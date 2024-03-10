@@ -208,6 +208,61 @@ Animals without chips exhibit significant variability in their residence time in
 
 ## Summary Statistics
 
+```{r}
+# Summary statistics
+summary_stats <- summary(data)
+
+print(summary_stats)
+```
+
+-   Animal_type:
+
+There are four types of animals, with the highest number of dogs (1146), 304 cats, 3 birds, and 12 wild animals.
+
+-   Month:
+
+represents the month in the dataset, with a minimum value of 1 (January) and a maximum value of 12 (December). The median is 6.
+
+-   Year:
+
+The dataset contains data from 2016 and 2017.
+
+-   Intake_type:
+
+Describe the reasons why animals enter a shelter, mainly including being confiscated, being sent out for adoption by the owner, and wandering.
+
+-   Output_type:
+
+Describe the results of an animal leaving a shelter, including adoption, death, euthanasia, foster care, and return to its owner.
+
+-   Chip_status:
+
+Record whether animals have chips. There are 278 animals with chips, 1127 animals without chips, and 60 animals that cannot be scanned with chips.
+
+-   Time_shelter:
+
+The amount of time an animal stays in a shelter, from 0 days to a maximum of 87 days. The average stay time is about 6 days, with a median of 4 days.
+
+-   Date:
+
+The range of date data is from October 1, 2016 to September 1, 2017. The median date is April 1, 2017.
+
 ## Correlation Analysis
+
+```{r}
+# Select only numerical variables
+numeric_data <- data[, c("month", "year", "time_at_shelter")]
+
+# Using the cor() function to calculate the correlation coefficient matrix
+correlation_matrix <- cor(numeric_data, use = "complete.obs") # Processing missing values for the 'use' parameter
+
+print(correlation_matrix)
+```
+
+There is a strong negative correlation (-0.74) between month and year, which means that as the year increases, the month value decreases.
+
+The correlation between month and time_shelter is almost zero (-0.008), indicating that there is no significant linear relationship between the month and the time the animal spends in the shelter.
+
+The correlation between year and time_shelter is also very low (-0.039), indicating that there is no significant linear relationship between year and the time the animal stays in the shelter.
 
 ## Identifying Outliers
