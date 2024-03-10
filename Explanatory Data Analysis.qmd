@@ -266,3 +266,15 @@ The correlation between month and time_shelter is almost zero (-0.008), indicati
 The correlation between year and time_shelter is also very low (-0.039), indicating that there is no significant linear relationship between year and the time the animal stays in the shelter.
 
 ## Identifying Outliers
+```{r}
+# Calculate IQR
+Q1 <- quantile(data$time_at_shelter, 0.25)
+Q3 <- quantile(data$time_at_shelter, 0.75)
+IQR <- Q3 - Q1
+
+# Define the upper threshold for outliers
+upper_bound <- Q3 + 1.5 * IQR
+
+# Replace outliers with median
+data$time_at_shelter[data$time_at_shelter> upper_bound] <- median(data$time_at_shelter)
+```
