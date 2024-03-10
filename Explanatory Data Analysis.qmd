@@ -277,4 +277,10 @@ upper_bound <- Q3 + 1.5 * IQR
 
 # Replace outliers with median
 data$time_at_shelter[data$time_at_shelter> upper_bound] <- median(data$time_at_shelter)
+
+# animal_type
+prop.table(table(data$animal_type))
+# think twice
+data <- data %>%
+  filter(!(animal_type=="BIRD" | animal_type=="WILDLIFE"))
 ```
