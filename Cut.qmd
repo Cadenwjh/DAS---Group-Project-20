@@ -1,0 +1,137 @@
+```{r}
+data <- read.csv('dataset20.csv', stringsAsFactors = FALSE)
+str(data)
+
+data$animal_type <- as.factor(data$animal_type)
+data$intake_type <- as.factor(data$intake_type)
+data$outcome_type <- as.factor(data$outcome_type)
+data$chip_status <- as.factor(data$chip_status)
+data <- subset(data, select = -outcome_type)
+
+# think twice
+# data$month <- as.factor(data$month)
+# data$year <- as.factor(data$year)
+```
+
+#### glimpse
+
+```{r}
+# Distribution of numerical variables
+num_vars <- sapply(data, is.numeric)
+par(mfrow=c(2,2))
+for (var in names(data[num_vars])) {
+  hist(data[[var]], main=var, xlab=var)
+}
+# Correlation between numerical variables
+num_data <- data[num_vars]
+cor_matrix <- cor(num_data, use="complete.obs")
+heatmap(cor_matrix, symm=TRUE)
+# Countplot for categorical variables
+cat_vars <- sapply(data, is.factor)
+par(mfrow=c(2,2))
+for (var in names(data[cat_vars])) {
+  plot(table(data[[var]]), main=var, xlab=var, ylab="Count")
+}
+```
+
+#### time_at_shelter
+
+```{r}
+ggplot(data, aes(x=time_at_shelter))+
+geom_boxplot()
+# outliers: replace
+Q1 <- quantile(data$time_at_shelter, 0.25)
+Q3 <- quantile(data$time_at_shelter, 0.75)
+IQR <- Q3 - Q1
+upper <- Q3 + 1.5 * IQR
+out <- which(data$time_at_shelter > upper)
+med <- median(data$time_at_shelter)
+data$time_at_shelter[out] <- med
+ggplot(data, aes(x=time_at_shelter)) + 
+  geom_histogram(binwidth=1, fill='blue', color='black')
+```
+
+#### animal_type
+
+```{r}
+# animal_type
+prop.table(table(data$animal_type))
+# think twice
+data <- data %>%
+  filter(!(animal_type=="BIRD" | animal_type=="WILDLIFE"))
+```
+
+#### month
+
+```{r}
+ggplot(data, aes(x=month, y=time_at_shelter,group=month))+
+  geom_boxplot(aes(fill=month))
+# no impact
+```
+
+#### year
+
+```{r}
+ggplot(data, aes(x=year, y=time_at_shelter,group=year))+
+  geom_boxplot(aes(fill=year))
+# no impact
+```
+
+#### intake_type
+
+```{r}
+ggplot(data, aes(x=intake_type, y=time_at_shelter, group=intake_type))+
+  geom_boxplot(aes(fill=intake_type))
+```
+
+#### chip_status
+
+```{r}
+ggplot(data, aes(x=chip_status, y=time_at_shelter, group=chip_status))+
+  geom_boxplot(aes(fill=chip_status))
+```
+
+### Model Fitting
+
+#### Poisson model
+
+```{r}
+# All variables
+glm_model_all <- glm(time_at_shelter ~ animal_type + intake_type + chip_status, 
+                 family = poisson(), data = data)
+summary(glm_model_all)
+dp <- sum(resid(glm_model_all, type = "pearson")^2) / glm_model_all$df.res
+dp
+```
+
+#### Negative Binomial Model
+
+```{r}
+# dispersion
+glm_model_all_nb <- glm.nb(time_at_shelter ~ animal_type + intake_type + chip_status, data = data)
+summary(glm_model_all_nb)
+```
+
+```{r}
+plot_model(glm_model_all_nb,show.values = TRUE)
+CI <- exp(confint.default(glm_model_all_nb))
+# animal_type contains 1
+# chip_status contains 1
+```
+
+```{r}
+par(mfrow=c(2,2))
+plot(glm_model_all_nb)
+# QQ plot is not good
+```
+
+```{r}
+aic_poisson <- AIC(glm_model_all)
+aic_nb <- AIC(glm_model_all_nb)
+aic_poisson
+aic_nb
+```
+
+```{r}
+drop1(glm_model_all_nb, test = "F")
+```

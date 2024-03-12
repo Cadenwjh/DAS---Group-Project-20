@@ -1,3 +1,5 @@
+Combine with the the Explanatory Data Analysis File, this section is the next one.
+
 ---
 title: "Group 20"
 format: 
@@ -23,11 +25,16 @@ library(MASS)
 library(plyr)
 library(dplyr)
 library(sjPlot)
+library(AER)
 ```
 
-## GLM Analysis for Length of Stay
+# Inferential Statistical Analysis
 
-### Data Preparation
+In this section, several formal statistical models will be conducted using a Generalized Model Analysis to infer the relationships between variables.
+
+## Model Fitting
+
+###This should be conducted on the EDA section, so after combined it, this should be removed.
 
 ```{r}
 data <- read.csv('dataset20.csv', stringsAsFactors = FALSE)
@@ -35,109 +42,71 @@ str(data)
 
 data$animal_type <- as.factor(data$animal_type)
 data$intake_type <- as.factor(data$intake_type)
-data$outcome_type <- as.factor(data$outcome_type)
 data$chip_status <- as.factor(data$chip_status)
-data <- subset(data, select = -outcome_type)
-
-# think twice
-# data$month <- as.factor(data$month)
-# data$year <- as.factor(data$year)
+levels(data$year)
 ```
 
-### Explanatory Data Analysis
+### Poisson model
 
-#### glimpse
+Since the response variable represents the count data, the Poisson regression model is a starting point because it's the simplest model for the type of the data.
 
 ```{r}
-# Distribution of numerical variables
-num_vars <- sapply(data, is.numeric)
+glm_poisson <- glm(time_at_shelter ~ animal_type + month + year + intake_type + chip_status, family = "poisson", data = data)
+summary(glm_poisson)
+```
+
+Before presenting and interpreting the derived equation from our GLM analysis, it's important to note that validating the model's underlying assumptions is a critical step. Ensuring the assumptions hold true bolsters the reliability of our findings. Here's the equation based on the initial analysis, subject to further validation:
+
+$$
+\log(\text{Expected Count of Time at Shelter}) = 578.124443 + 2.765699 \times \text{AnimalTypeCat} + 2.875463 \times \text{AnimalTypeDog} + 2.609189 \times \text{AnimalTypeWildlife} - 0.030088 \times \text{Month} - 0.286813 \times \text{Year} - 0.735566 \times \text{IntakeTypeOwnerSurrender} - 0.517652 \times \text{IntakeTypeStray} - 0.472796 \times \text{ChipStatusUnableToScan}
+$$
+
+where,  
+(\text{AnimalTypeCat}\), \(\text{AnimalTypeDog}\),(\text{AnimalTypeWildlife}\) are indicator variables for the animal types, taking the value 1 if the condition is true and 0 otherwise.
+- \(\text{Month}\) and \(\text{Year}\) are numerical variables representing the month and year of intake.
+- \(\text{IntakeTypeOwnerSurrender}\) and \(\text{IntakeTypeStray}\) are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise.
+
+#### Model Diagnostics and Assumptions Checking
+
+Our analysis employed a Poisson regression model to explore how various factors, including **`animal_type`**, **`month`**, **`year`**, **`intake_type`**, and **`chip_status`**, affect the length of stay in a shelter. We assessed the model's goodness-of-fit through deviance and Pearson's chi-squared statistics, which compare observed data to model predictions. Values close to the degrees of freedom for these statistics suggest an adequate fit. Additionally, we evaluated the dispersion parameter to identify potential overdispersion, a condition where observed variance surpasses the mean, contrary to the Poisson assumption of equidispersion. Residual analysis was also conducted to ensure no systematic patterns were present, which could indicate model specification issues.
+
+**Deviance:**
+
+Deviance is used to quantify the difference between a fitted model and a perfect model (a saturated model that fits the data exactly).
+
+-   Null Deviance: this represents the goodness of fit of a model that includes only the intercept (no predictors). It is 10754 on 1464 degrees of freedom.
+
+-   Residual Deviance: This is the goodness of fit of the model that includes predictors (**`animal_type`**, **`month`**, **`year`**, **`intake_type`**, **`chip_status`**). It is 10266 on 1455 degrees of freedom.
+
+The residual deviance is used to assess the fit of the model to the data. For a well-fitting model, the residual deviance should be close to the degrees of freedom (relatively low). Here, the residual deviance (10266) is quite high compared to the degrees of freedom (1455), which might indicate that the model does not fit the data perfectly. This could be a sign of overdispersion or that the model is missing some key explanatory variables.
+
+**Dispersion**
+
+```{r}
+dispersiontest(glm_poisson)
 par(mfrow=c(2,2))
-for (var in names(data[num_vars])) {
-  hist(data[[var]], main=var, xlab=var)
-}
-# Correlation between numerical variables
-num_data <- data[num_vars]
-cor_matrix <- cor(num_data, use="complete.obs")
-heatmap(cor_matrix, symm=TRUE)
-# Countplot for categorical variables
-cat_vars <- sapply(data, is.factor)
-par(mfrow=c(2,2))
-for (var in names(data[cat_vars])) {
-  plot(table(data[[var]]), main=var, xlab=var, ylab="Count")
-}
+plot(glm_poisson)
 ```
 
-#### time_at_shelter
+The hypothesis being tested relates to the dispersion of the data with a significance level 5% is stated below:
 
-```{r}
-ggplot(data, aes(x=time_at_shelter))+
-geom_boxplot()
-# outliers: replace
-Q1 <- quantile(data$time_at_shelter, 0.25)
-Q3 <- quantile(data$time_at_shelter, 0.75)
-IQR <- Q3 - Q1
-upper <- Q3 + 1.5 * IQR
-out <- which(data$time_at_shelter > upper)
-med <- median(data$time_at_shelter)
-data$time_at_shelter[out] <- med
-ggplot(data, aes(x=time_at_shelter)) + 
-  geom_histogram(binwidth=1, fill='blue', color='black')
-```
+**Null Hypothesis (H0):**
 
-#### animal_type
+The null hypothesis posits that the true dispersion parameter equals 1. This means the data follow a Poisson distribution accurately, where the mean and variance of the count data are equal (equidispersion). The model is adequately specified, and there's no extra variability in the data beyond what the Poisson model accounts for.
 
-```{r}
-# animal_type
-prop.table(table(data$animal_type))
-# think twice
-data <- data %>%
-  filter(!(animal_type=="BIRD" | animal_type=="WILDLIFE"))
-```
+**Alternative Hypothesis (Ha):**
 
-#### month
+The alternative hypothesis suggests that the true dispersion parameter is greater than 1, indicating overdispersion in the data. Overdispersion occurs when the observed variance in the count data is greater than what the Poisson model would predict based on the mean.
 
-```{r}
-ggplot(data, aes(x=month, y=time_at_shelter,group=month))+
-  geom_boxplot(aes(fill=month))
-# no impact
-```
+**Interpretation:**
 
-#### year
+-   p-value is extremely small, below the significance level, which indicates that the result is highly statistically significant. Hence, this supports the alternative hypothesis that the true dispersion is greater than 1.
 
-```{r}
-ggplot(data, aes(x=year, y=time_at_shelter,group=year))+
-  geom_boxplot(aes(fill=year))
-# no impact
-```
+-   The sample estimated - dispersion is 8.52551 which is substantially greater than 1, indicating a significant level of overdispersion in the data.
 
-#### intake_type
+-   Given this evidence of overdispersion, it would be prudent to consider alternative models that can accommodate the extra variability, such as a Negative Binomial regression model which will be conducted later.
 
-```{r}
-ggplot(data, aes(x=intake_type, y=time_at_shelter, group=intake_type))+
-  geom_boxplot(aes(fill=intake_type))
-```
-
-#### chip_status
-
-```{r}
-ggplot(data, aes(x=chip_status, y=time_at_shelter, group=chip_status))+
-  geom_boxplot(aes(fill=chip_status))
-```
-
-### Model Fitting
-
-#### Poisson model
-
-```{r}
-# All variables
-glm_model_all <- glm(time_at_shelter ~ animal_type + intake_type + chip_status, 
-                 family = poisson(), data = data)
-summary(glm_model_all)
-dp <- sum(resid(glm_model_all, type = "pearson")^2) / glm_model_all$df.res
-dp
-```
-
-#### Negative Binomial Model
+### Negative Binomial Model
 
 ```{r}
 # dispersion
@@ -168,3 +137,7 @@ aic_nb
 ```{r}
 drop1(glm_model_all_nb, test = "F")
 ```
+
+## Model Selection
+
+## Model Interpretation and Conclusion
