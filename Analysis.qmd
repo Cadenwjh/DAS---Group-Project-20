@@ -28,116 +28,241 @@ library(sjPlot)
 library(AER)
 ```
 
-# Inferential Statistical Analysis
+# Formal Data Analysis
 
 In this section, several formal statistical models will be conducted using a Generalized Model Analysis to infer the relationships between variables.
 
-## Model Fitting
+## A. Model Fitting
 
-###This should be conducted on the EDA section, so after combined it, this should be removed.
+***This should be conducted on the EDA section, so after combined it, this should be removed***.
 
 ```{r}
+#| echo: FALSE
+#| results: 'hide'
 data <- read.csv('dataset20.csv', stringsAsFactors = FALSE)
 str(data)
 
 data$animal_type <- as.factor(data$animal_type)
 data$intake_type <- as.factor(data$intake_type)
 data$chip_status <- as.factor(data$chip_status)
-levels(data$year)
 ```
 
-### Poisson model
+### A.1 Poisson Model
 
-Since the response variable represents the count data, the Poisson regression model is a starting point because it's the simplest model for the type of the data.
+Since the response variable represents the count data, the Poisson regression model is a starting point because it ise the simplest model for the type of the data. It was conducted by this result:
 
 ```{r}
+#| echo: false
 glm_poisson <- glm(time_at_shelter ~ animal_type + month + year + intake_type + chip_status, family = "poisson", data = data)
 summary(glm_poisson)
 ```
 
-Before presenting and interpreting the derived equation from our GLM analysis, it's important to note that validating the model's underlying assumptions is a critical step. Ensuring the assumptions hold true bolsters the reliability of our findings. Here's the equation based on the initial analysis, subject to further validation:
+Before presenting and interpreting the derived equation from our GLM analysis, it is important to note that validating the model is underlying assumptions is a critical step. Ensuring the assumptions hold true bolsters the reliability of our findings. Here's the equation based on the initial analysis, subject to further validation:
 
 $$
-\log(\text{Expected Count of Time at Shelter}) = 578.124443 + 2.765699 \times \text{AnimalTypeCat} + 2.875463 \times \text{AnimalTypeDog} + 2.609189 \times \text{AnimalTypeWildlife} - 0.030088 \times \text{Month} - 0.286813 \times \text{Year} - 0.735566 \times \text{IntakeTypeOwnerSurrender} - 0.517652 \times \text{IntakeTypeStray} - 0.472796 \times \text{ChipStatusUnableToScan}
+\begin{aligned}
+\log(\text{Expected Count of Time at Shelter}) &= 578.124443 \\
+&+ 2.765699 \times \text{AnimalTypeCat} \\
+&+ 2.875463 \times \text{AnimalTypeDog} \\
+&+ 2.609189 \times \text{AnimalTypeWildlife} \\
+&- 0.030088 \times \text{Month} \\
+&- 0.286813 \times \text{Year} \\
+&- 0.735566 \times \text{IntakeTypeOwnerSurrender} \\
+&- 0.517652 \times \text{IntakeTypeStray} \\
+&- 0.014802 \times \text{ChipStatusScanNoChip} \\
+&- 0.472796 \times \text{ChipStatusUnableToScan}
+\end{aligned}
 $$
 
-where,  
-(\text{AnimalTypeCat}\), \(\text{AnimalTypeDog}\),(\text{AnimalTypeWildlife}\) are indicator variables for the animal types, taking the value 1 if the condition is true and 0 otherwise.
-- \(\text{Month}\) and \(\text{Year}\) are numerical variables representing the month and year of intake.
-- \(\text{IntakeTypeOwnerSurrender}\) and \(\text{IntakeTypeStray}\) are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise.
+where,
+
+-   $\text{AnimalTypeCat}$, $\text{AnimalTypeDog}$, $\text{AnimalTypeWildlife}$ are indicator variables for the animal types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{AnimalTypeBird}$.
+
+-   $\text{Month}$ and $\text{Year}$ are numerical variables representing the month and year of intake.
+
+-   $\text{IntakeTypeOwnerSurrender}$ and $\text{IntakeTypeStray}$ are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{IntakeTypeConfiscated}$.
+
+-   $\text{ChipStatusScanNoChip}$ and $\text{ChipStatusUnableToScan}$ are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{ChipStatusScanChip}$.
 
 #### Model Diagnostics and Assumptions Checking
 
-Our analysis employed a Poisson regression model to explore how various factors, including **`animal_type`**, **`month`**, **`year`**, **`intake_type`**, and **`chip_status`**, affect the length of stay in a shelter. We assessed the model's goodness-of-fit through deviance and Pearson's chi-squared statistics, which compare observed data to model predictions. Values close to the degrees of freedom for these statistics suggest an adequate fit. Additionally, we evaluated the dispersion parameter to identify potential overdispersion, a condition where observed variance surpasses the mean, contrary to the Poisson assumption of equidispersion. Residual analysis was also conducted to ensure no systematic patterns were present, which could indicate model specification issues.
+The analysis utilized a Poisson regression model to investigate the impact of factors such as, including **`animal_type`**, **`month`**, **`year`**, **`intake_type`**, and **`chip_status`**, on the duration of stay in a shelter.
 
-**Deviance:**
+To ensure the robustness of our model, we conducted a thorough diagnostic evaluation using several methods. We checked the dispersion parameter to evaluate the presence of overdispersion, which would violate the Poisson assumption of equal mean and variance.
 
-Deviance is used to quantify the difference between a fitted model and a perfect model (a saturated model that fits the data exactly).
+We also examined the deviance to assess the model\'s goodness-of-fit, with a value near the degrees of freedom indicating a well-fitting model.
 
--   Null Deviance: this represents the goodness of fit of a model that includes only the intercept (no predictors). It is 10754 on 1464 degrees of freedom.
-
--   Residual Deviance: This is the goodness of fit of the model that includes predictors (**`animal_type`**, **`month`**, **`year`**, **`intake_type`**, **`chip_status`**). It is 10266 on 1455 degrees of freedom.
-
-The residual deviance is used to assess the fit of the model to the data. For a well-fitting model, the residual deviance should be close to the degrees of freedom (relatively low). Here, the residual deviance (10266) is quite high compared to the degrees of freedom (1455), which might indicate that the model does not fit the data perfectly. This could be a sign of overdispersion or that the model is missing some key explanatory variables.
+Additionally, we conducted a residual analysis, including plotting residuals against fitted values and creating Q-Q plots of standardized residuals, to detect any systematic patterns that might indicate model misspecification. Together, these diagnostics help validate our model and confirm the reliability of our conclusions.
 
 **Dispersion**
 
+In a Poisson generalized linear model (GLM), the dispersion parameter is assumed to be fixed at 1. This assumption is crucial because the Poisson distribution is characterized by its mean being equal to its variance, a property known as *equidispersion*. When the observed variance is greater than the mean, the data exhibit *overdispersion*. This is more common in practice and can arise from various sources, such as unobserved heterogeneity among observations, excess zeros, or violations of the Poisson model's assumptions (such as events not occurring independently).
+
+Then, the hypothesis being tested relates to the dispersion of the data with a significance level 5% is stated below:
+
+-   Null Hypothesis (H0):
+
+    The null hypothesis posits that the true dispersion parameter equals 1. This means the data follow a Poisson distribution accurately, where the mean and variance of the count data are equal (equidispersion). The model is adequately specified, and there's no extra variability in the data beyond what the Poisson model accounts for.
+
+-   Alternative Hypothesis (Ha):
+
+    The alternative hypothesis suggests that the true dispersion parameter is greater than 1, indicating overdispersion in the data. Overdispersion occurs when the observed variance in the count data is greater than what the Poisson model would predict based on the mean.
+
 ```{r}
+#| echo: false
 dispersiontest(glm_poisson)
-par(mfrow=c(2,2))
-plot(glm_poisson)
 ```
 
-The hypothesis being tested relates to the dispersion of the data with a significance level 5% is stated below:
+```{r}
+#| echo: false
+#| fig-cap: Residuals Plot for Assessing Dispersion in Poisson Regression
+#| label: fig-resid
+#| fig-align: center
+#| fig-width: 3.5
+#| fig-height: 3.5
 
-**Null Hypothesis (H0):**
+ggplot(glm_poisson, aes(x = log(fitted(glm_poisson)), y = log((data$time_at_shelter - fitted(glm_poisson))^2))) + geom_point(col = "#DD7A65") + geom_abline(slope = 1, intercept = 0, col = "#F58B05", size = 1) + ylab(expression((y-hat(mu))^2)) + xlab(expression(hat(mu)))
+```
 
-The null hypothesis posits that the true dispersion parameter equals 1. This means the data follow a Poisson distribution accurately, where the mean and variance of the count data are equal (equidispersion). The model is adequately specified, and there's no extra variability in the data beyond what the Poisson model accounts for.
-
-**Alternative Hypothesis (Ha):**
-
-The alternative hypothesis suggests that the true dispersion parameter is greater than 1, indicating overdispersion in the data. Overdispersion occurs when the observed variance in the count data is greater than what the Poisson model would predict based on the mean.
-
-**Interpretation:**
+Interpretation:
 
 -   p-value is extremely small, below the significance level, which indicates that the result is highly statistically significant. Hence, this supports the alternative hypothesis that the true dispersion is greater than 1.
 
 -   The sample estimated - dispersion is 8.52551 which is substantially greater than 1, indicating a significant level of overdispersion in the data.
 
+-   Meanwhile, a common way to assess dispersion in a Poisson model is through a plot of the residuals which is displayed in @fig-resid. It suggests that as the predicted values increase, the variance of the residuals also increases (as indicated by the upward trend), which is a classic sign of overdispersion. Overdispersion is when the variance is greater than the mean, which often occurs with count data.
+
 -   Given this evidence of overdispersion, it would be prudent to consider alternative models that can accommodate the extra variability, such as a Negative Binomial regression model which will be conducted later.
 
-### Negative Binomial Model
+**Deviance:**
+
+Deviance is used to quantify the difference between a fitted model and a perfect model (a saturated model that fits the data exactly). The deviance essentially quantifies the discrepancy between the observed data and the values predicted by the model under the assumption that the model is correct. A lower deviance indicates a better fit of the model to the data.
+
+Hence, based on the generated model result, we got:
+
+-   Null Deviance: this represents the goodness of fit of a model that includes only the intercept (no predictors). It is 10754 on 1464 degrees of freedom.
+
+-   Residual Deviance: This is the goodness of fit of the model that includes predictors (**`animal_type`**, **`month`**, **`year`**, **`intake_type`**, **`chip_status`**). It is 10266 on 1455 degrees of freedom.
+
+The residual deviance is used to assess the fit of the model to the data. For a well-fitting model, the residual deviance should be close to the degrees of freedom (relatively low). Here, the residual deviance (10266) is quite high compared to the Chi-square distribution with the 1455 - degrees of freedom, which might indicate that the model does not fit the data perfectly. This could be a sign of overdispersion or that the model is missing some key explanatory variables.
+
+**Residuals Analysis**
+
+-   Plotting residuals vs. fitted values
+
+    ```{r}
+    #| echo: false
+    #| fig-cap: Residuals vs. Fitted Values Plot for Poissron Regression Model
+    #| label: fig-resid_analysis1
+    #| fig-align: center
+    #| fig-width: 4
+    #| fig-height: 3
+
+    plot(glm_poisson$fitted.values, residuals(glm_poisson, type = "deviance"), 
+         xlab = "Fitted Values", ylab = "Deviance Residuals", pch = 20)
+    abline(h = 0, col = "red")
+    ```
+
+    Based on the plot @fig-resid_analysis1 The residuals plot here shows that as the fitted values increase, the spread of the residuals also increases. The increase in the spread of residuals as the fitted values increase suggests that the variance of the residuals is not constant. This pattern indicates potential overdispersion in the data where the variance exceeds the mean.
+
+-   Scale location plot (spread vs. level plot)
+
+    ```{r}
+    #| echo: false
+    #| fig-cap: Scale-Location Plot (Spread vs. Level Plot)
+    #| label: fig-resid_analysis2
+    #| fig-align: center
+    #| fig-width: 4
+    #| fig-height: 3
+
+    plot(glm_poisson$fitted.values, sqrt(abs(residuals(glm_poisson, type = "pearson"))), xlab = "Fitted Values", ylab = "√|Standardized Pearson Residuals|")
+    ```
+
+    The plot @fig-resid_analysis2 represents a scatter plot of the square root of the absolute standardized Pearson residuals versus the fitted values from a Generalized Linear Model (GLM). It will give the information about the move of the variance across different levels of the mean, making it easier to see whether there is a consistent spread of residuals across all counts or whether the spread increases with the count (which would indicate overdispersion). Meanwhile, we can see that there is a concentration of residuals around the lower fitted values, with residuals spreading out as the fitted values increase. It reveals several points that stand out from the main cluster, particularly at the mid-range of fitted values, indicating potential outliers or influential observations. This pattern suggests possible overdispersion in the data and will be advisable to consider model alternatives like the negative binomial regression.
+
+```{=html}
+<!-- -->
+```
+-   Residual vs. leverage
+
+    ```{r}
+    #| echo: false
+    #| fig-cap: Residuals vs. Leverage Plot
+    #| label: fig-resid_analysis3
+    #| fig-align: center
+    #| fig-width: 4
+    #| fig-height: 3
+
+    plot(hatvalues(glm_poisson), residuals(glm_poisson, type = "pearson"), 
+         xlab = "Leverage", ylab = "Pearson Residuals")
+    abline(h = 0, col = "red")
+    ```
+
+    Most of the data points cluster at the left side of the plot, suggesting that these observations have lower leverage and smaller residuals shown by the plot @fig-resid_analysis3. Then, they don't have an undue influence on the model which seems the model fits well for the majority of the data. However, the presence of points with high residuals, high leverage, or both suggests there are some exceptions where the model's fit is not as good. Hence, it would be that while the model appears to provide a good fit for most of the data, there are specific observations that require further investigation to ensure the model's robustness and to potentially improve its accuracy.
+
+When diagnostic plots provide different insights, it is crucial to consider the overall evidence and the specific research context. If overdispersion is a consistent concern across multiple diagnostics (like the Residuals vs. Fitted Values Plot and the Scale-Location Plot), it often outweighs indications from other plots that the model might be adequate for most data points. Therefore, even if the Residuals vs. Leverage Plot suggests the model is mostly fitting well, the evidence of overdispersion from the other plots is a strong indicator that the Poisson model might not be the best choice. Exploring alternative models like the Negative Binomial, which can accommodate overdispersion, is likely a prudent step to improve model fit and ensure more reliable inference from the model.
+
+\clearpage
+
+### A.2 Negative Binomial Model
+
+It will be conducted the Negative Binomial Model which is a good alternative model when the assumption of equidispersion (mean equals variance) in Poisson regression doesn't hold. The result was shown by:
 
 ```{r}
-# dispersion
-glm_model_all_nb <- glm.nb(time_at_shelter ~ animal_type + intake_type + chip_status, data = data)
-summary(glm_model_all_nb)
+glm_nb <- glm.nb(time_at_shelter ~ animal_type + month + year + intake_type + chip_status, data = data)
+summary(glm_nb)
 ```
 
+$$
+\begin{aligned}
+\log(\text{Expected Count of Time at Shelter}) = 
+&\ 620.40667 \\
+&+ 2.76946 \times \text{AnimalTypeCat} \\
+&+ 2.86336 \times \text{AnimalTypeDog} \\
+&+ 2.58130 \times \text{AnimalTypeWildLife} \\
+&- 0.03283 \times \text{Month} \\
+&- 0.30775 \times \text{Year} \\
+&- 0.75490 \times \text{IntakeTypeOwnerSurrender} \\
+&- 0.55483 \times \text{IntakeTypeOwnerStrayStary} \\
+&+ 0.01468 \times \text{ChipStatusScanNoChip} \\
+&- 0.47382 \times \text{ChipStatusUnableToScan}
+\end{aligned}
+$$
+
+where,
+
+-   $\text{AnimalTypeCat}$, $\text{AnimalTypeDog}$, $\text{AnimalTypeWildlife}$ are indicator variables for the animal types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{AnimalTypeBird}$.
+
+-   $\text{Month}$ and $\text{Year}$ are numerical variables representing the month and year of intake.
+
+-   $\text{IntakeTypeOwnerSurrender}$ and $\text{IntakeTypeStray}$ are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{IntakeTypeConfiscated}$.
+
+-   $\text{ChipStatusScanNoChip}$ and $\text{ChipStatusUnableToScan}$ are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{ChipStatusScanChip}$.
+
 ```{r}
-plot_model(glm_model_all_nb,show.values = TRUE)
-CI <- exp(confint.default(glm_model_all_nb))
+plot_model(glm_nb,show.values = TRUE)
+CI <- exp(confint.default(glm_nb))
 # animal_type contains 1
 # chip_status contains 1
 ```
 
 ```{r}
 par(mfrow=c(2,2))
-plot(glm_model_all_nb)
+plot(glm_nb)
 # QQ plot is not good
 ```
 
 ```{r}
-aic_poisson <- AIC(glm_model_all)
-aic_nb <- AIC(glm_model_all_nb)
+aic_poisson <- AIC(glm_poisson)
+aic_nb <- AIC(glm_nb)
 aic_poisson
 aic_nb
 ```
 
 ```{r}
-drop1(glm_model_all_nb, test = "F")
+drop1(glm_nb, test = "F")
 ```
 
-## Model Selection
+## B. Model Selection
 
-## Model Interpretation and Conclusion
+## C. Model Interpretation and Conclusion
