@@ -53,6 +53,7 @@ The main objective is to know **which factors influence the number of days an an
 library(ggplot2)
 library(dplyr)
 library(ggbeeswarm)
+library(car)
 ```
 
 ```{r}
@@ -284,3 +285,15 @@ prop.table(table(data$animal_type))
 data <- data %>%
   filter(!(animal_type=="BIRD" | animal_type=="WILDLIFE"))
 ```
+
+## Multicollinearity
+```{r}
+# Fit a linear model with 'time_t_shell' as the response variable and all other columns as the predictive variables
+model <- lm(time_at_shelter ~ ., data = data)
+# Calculate and print VIF values
+vif_values <- vif(model)
+print(vif_values)
+```
+The GVIF values for month, year, and date are very high, especially for year and date, with adjusted GVIF values of approximately 241.73 and 163.95, respectively, far exceeding the conventional critical values, indicating a high degree of linear relationship between them and other variables in the model.
+
+The adjusted GVIF values for animal-type, intake_type, output_type, and chip_status are relatively low, indicating that their collinearity with other variables is relatively small.
