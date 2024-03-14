@@ -84,15 +84,11 @@ where,
 
 -   $\text{ChipStatusScanNoChip}$ and $\text{ChipStatusUnableToScan}$ are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{ChipStatusScanChip}$.
 
+The significance of a Generalized Linear Model (GLM) can be assessed by examining the p-values associated with the coefficients of the model, which indicate the strength of evidence against the null hypothesis that the corresponding coefficients are equal to zero. A small p-value (in this case, compared to the significance level 0.05) indicates strong evidence against the null hypothesis, suggesting that it is unlikely to observe such a significant effect if the predictor really had no impact on the response variable. Conversely, a large p-value suggests insufficient evidence to reject the null hypothesis, indicating that the predictor may not have a significant effect on the response variable. Meanwhile derived from the model, $\text{AnimalTypeCat}$, $\text{AnimalTypeDog}$, $\text{AnimalTypeWildLife}$, $\text{Month}$, $\text{Year}$, $\text{IntakeTypeSurrenderOwnerSurrender}$, $\text{IntakeTypeStray}$, and $\text{ChipStatusUnableToScan}$ variables are significant predictors of the time an animal spends in the shelter. On the other hand, the presence of a microchip, unless it cannot be scanned ($\text{ChipStatusScanNoChip}$ variable), does not significantly affect shelter time.
+
 #### Model Diagnostics and Assumptions Checking
 
-The analysis utilized a Poisson regression model to investigate the impact of factors such as, including **`animal_type`**, **`month`**, **`year`**, **`intake_type`**, and **`chip_status`**, on the duration of stay in a shelter.
-
-To ensure the robustness of our model, we conducted a thorough diagnostic evaluation using several methods. We checked the dispersion parameter to evaluate the presence of overdispersion, which would violate the Poisson assumption of equal mean and variance.
-
-We also examined the deviance to assess the model\'s goodness-of-fit, with a value near the degrees of freedom indicating a well-fitting model.
-
-Additionally, we conducted a residual analysis, including plotting residuals against fitted values and creating Q-Q plots of standardized residuals, to detect any systematic patterns that might indicate model misspecification. Together, these diagnostics help validate our model and confirm the reliability of our conclusions.
+The analysis utilized a Poisson regression model to investigate the impact of factors such as, including $\text{AnimalType}$, $\text{Month}$, $\text{Year}$, $\text{IntakeType}$, and $\text{ChipStatus}$ on the duration of stay in a shelter. To ensure the robustness of our model, we conducted a thorough diagnostic evaluation using several methods. We checked the dispersion parameter to evaluate the presence of overdispersion, which would violate the Poisson assumption of equal mean and variance. We also examined the deviance to assess the model's goodness-of-fit, with a value near the degrees of freedom indicating a well-fitting model. Additionally, we conducted a residual analysis, including plotting residuals against fitted values and creating Q-Q plots of standardized residuals, to detect any systematic patterns that might indicate model misspecification. Together, these diagnostics help validate our model and confirm the reliability of our conclusions.
 
 **Dispersion**
 
@@ -109,7 +105,6 @@ Then, the hypothesis being tested relates to the dispersion of the data with a s
     The alternative hypothesis suggests that the true dispersion parameter is greater than 1, indicating overdispersion in the data. Overdispersion occurs when the observed variance in the count data is greater than what the Poisson model would predict based on the mean.
 
 ```{r}
-#| echo: false
 dispersiontest(glm_poisson)
 ```
 
@@ -142,7 +137,7 @@ Hence, based on the generated model result, we got:
 
 -   Null Deviance: this represents the goodness of fit of a model that includes only the intercept (no predictors). It is 10754 on 1464 degrees of freedom.
 
--   Residual Deviance: This is the goodness of fit of the model that includes predictors (**`animal_type`**, **`month`**, **`year`**, **`intake_type`**, **`chip_status`**). It is 10266 on 1455 degrees of freedom.
+-   Residual Deviance: This is the goodness of fit of the model that includes predictors ($\text{AnimalType}$, $\text{Month}$, $\text{Year}$, $\text{IntakeType}$, and $\text{ChipStatus}$). It is 10266 on 1455 degrees of freedom.
 
 The residual deviance is used to assess the fit of the model to the data. For a well-fitting model, the residual deviance should be close to the degrees of freedom (relatively low). Here, the residual deviance (10266) is quite high compared to the Chi-square distribution with the 1455 - degrees of freedom, which might indicate that the model does not fit the data perfectly. This could be a sign of overdispersion or that the model is missing some key explanatory variables.
 
@@ -180,9 +175,6 @@ The residual deviance is used to assess the fit of the model to the data. For a 
 
     The plot @fig-resid_analysis2 represents a scatter plot of the square root of the absolute standardized Pearson residuals versus the fitted values from a Generalized Linear Model (GLM). It will give the information about the move of the variance across different levels of the mean, making it easier to see whether there is a consistent spread of residuals across all counts or whether the spread increases with the count (which would indicate overdispersion). Meanwhile, we can see that there is a concentration of residuals around the lower fitted values, with residuals spreading out as the fitted values increase. It reveals several points that stand out from the main cluster, particularly at the mid-range of fitted values, indicating potential outliers or influential observations. This pattern suggests possible overdispersion in the data and will be advisable to consider model alternatives like the negative binomial regression.
 
-```{=html}
-<!-- -->
-```
 -   Residual vs. leverage
 
     ```{r}
@@ -193,12 +185,11 @@ The residual deviance is used to assess the fit of the model to the data. For a 
     #| fig-width: 4
     #| fig-height: 3
 
-    plot(hatvalues(glm_poisson), residuals(glm_poisson, type = "pearson"), 
-         xlab = "Leverage", ylab = "Pearson Residuals")
+    plot(hatvalues(glm_poisson), residuals(glm_poisson, type = "pearson"), xlab = "Leverage", ylab = "Pearson Residuals")
     abline(h = 0, col = "red")
     ```
 
-    Most of the data points cluster at the left side of the plot, suggesting that these observations have lower leverage and smaller residuals shown by the plot @fig-resid_analysis3. Then, they don't have an undue influence on the model which seems the model fits well for the majority of the data. However, the presence of points with high residuals, high leverage, or both suggests there are some exceptions where the model's fit is not as good. Hence, it would be that while the model appears to provide a good fit for most of the data, there are specific observations that require further investigation to ensure the model's robustness and to potentially improve its accuracy.
+    Most of the data points cluster at the left side of the plot, suggesting that these observations have lower leverage and smaller residuals, shown by the plot @fig-resid_analysis3. Then, they don't have an undue influence on the model which seems the model fits well for the majority of the data. However, the presence of points with high residuals and high leverage in the right side suggests there are some exceptions where the model's fit is not as good. Hence, it would be that while the model appears to provide a good fit for most of the data, there are specific observations that require further investigation to ensure the model's robustness and to potentially improve its accuracy.
 
 When diagnostic plots provide different insights, it is crucial to consider the overall evidence and the specific research context. If overdispersion is a consistent concern across multiple diagnostics (like the Residuals vs. Fitted Values Plot and the Scale-Location Plot), it often outweighs indications from other plots that the model might be adequate for most data points. Therefore, even if the Residuals vs. Leverage Plot suggests the model is mostly fitting well, the evidence of overdispersion from the other plots is a strong indicator that the Poisson model might not be the best choice. Exploring alternative models like the Negative Binomial, which can accommodate overdispersion, is likely a prudent step to improve model fit and ensure more reliable inference from the model.
 
@@ -239,30 +230,120 @@ where,
 
 -   $\text{ChipStatusScanNoChip}$ and $\text{ChipStatusUnableToScan}$ are indicator variables for the intake types, taking the value 1 if the condition is true and 0 otherwise with the baseline category $\text{ChipStatusScanChip}$.
 
-```{r}
-plot_model(glm_nb,show.values = TRUE)
-CI <- exp(confint.default(glm_nb))
-# animal_type contains 1
-# chip_status contains 1
-```
+Based on the result, $\text{AnimalTypeCat}$, $\text{AnimalTypeDog}$, $\text{AnimalTypeWildLife}$, $\text{Month}$, $\text{Year}$, $\text{IntakeTypeSurrenderOwnerSurrender}$, $\text{IntakeTypeStray}$, and $\text{ChipStatusUnableToScan}$ variables significantly affect the time an animal spends in the shelter, while $\text{ChipStatusScanNoChip}$ variable does not have a significantly affect. In light of these findings, model selection techniques, particularly the comparison of Akaike Information Criterion (AIC) values, will be employed in subsequent analyses to refine the model further.
+
+#### Model Diagnostics and Assumptions Checking
+
+To ensure the reliability and validity of our Negative Binomial regression model findings, it is imperative to rigorously examine the underlying assumptions through a series of diagnostic checks.
+
+**Overdispersion Check**
+
+Attained from the model summary, we can draw the result that the parameter $\text{Theta}$: 0.7625 along with a relatively small standard error $\text{Std.Err}$: 0.0348 which indicates that the model has identified and is accounting for overdispersion in the data. It suggest that the Negative Binomial model is a suitable choice for the data, given the presence of overdispersion as a positive outcome in terms of assumptions checking for the model.
+
+**Residual Deviance**
+
+Deviance in GLMs is a measure of the goodness-of-fit of a model. It is based on the likelihood function and compares two models between the fitted model and a reference model. The lower the deviance, the closer the fitted model is to the reference model in terms of likelihood. Comparing the residual deviance to the degrees of freedom helps assess if the fitted model is adequately fitting the data without overfitting. If the residual deviance is close to the degrees of freedom for the fitted model, it suggests that the model is adequately fitting the data.
+
+Then, in the model summary, attained the Residual Deviance: 1687.1 with the 1455 degrees of freedom and the Null Deviance: 1743.0 with the 1464 degrees of freedom, this shows how much better the model fits the data compared to the model with only the intercept. Meanwhile, the residual deviance is relatively close to the degrees of freedom suggests that the model is doing a reasonably good job of fitting the data.
+
+**Residual Analysis**
+
+In evaluating the adequacy of our Negative Binomial regression model, a series of residual diagnostic plots were examined, including Residuals vs Fitted, Normal Q-Q, Scale-Location, and Residuals vs Leverage, each offering insights into different aspects of model fit and underlying assumptions.
 
 ```{r}
-par(mfrow=c(2,2))
+#| echo: false
+#| fig-cap: Residuals vs. Fitted Values Plot
+#| label: fig-BN
+#| fig-align: center
+#| fig-width: 4
+#| fig-height: 3
+
+par(mfrow = c(1,1))
 plot(glm_nb)
-# QQ plot is not good
 ```
 
-```{r}
-aic_poisson <- AIC(glm_poisson)
-aic_nb <- AIC(glm_nb)
-aic_poisson
-aic_nb
-```
+-   Residuals vs. Fitted Values Plot
 
-```{r}
-drop1(glm_nb, test = "F")
-```
+    ```{r}
+    par(mfrow = c(2,2))
+    plot(glm_nb)
+    ```
+
+    ```{r}
+    #| echo: false
+    #| fig-cap: Residuals vs. Fitted Values Plot
+    #| label: fig-BN1
+    #| fig-align: center
+    #| fig-width: 4
+    #| fig-height: 3
+
+    plot(glm_nb, which = 1)
+    ```
+
+    Shown in the plot @fig-BN1, the residuals seem to increase slightly in variance with larger fitted values, suggesting potential mild heteroscedasticity. However, since this is count data being modeled with a Negative Binomial regression, some of this is to be expected and the model accounts for it. There may be some potential outliers, but their influence would need further investigation, possibly with additional diagnostics like Cook's distance.
+
+-   Normal Q-Q Plot:
+
+    ```{r}
+    #| echo: false
+    #| fig-cap: Normal Q-Q Plot
+    #| label: fig-BN2
+    #| fig-align: center
+    #| fig-width: 4
+    #| fig-height: 3
+
+    plot(glm_nb, which = 2)
+    ```
+
+    In the Q-Q plot @fig-BN2, the residuals deviate from the line at both ends, indicating that the residuals might not be following a normal distribution, which is a common issue for count data and is often the reason for using a Negative Binomial model instead of Poisson.
+
+-   Scale-Location Plot
+
+    ```{r}
+    #| echo: false
+    #| fig-cap: Scale-Location Plot
+    #| label: fig-BN3
+    #| fig-align: center
+    #| fig-width: 4
+    #| fig-height: 3
+
+    plot(glm_nb, which = 3)
+    ```
+
+    The red line, captured on the plot @fig-BN3, shows some fluctuation but does not exhibit a clear or strong trend which indicates potential mild heteroscedasticity. The spread of residuals at the higher end of predicted values suggests that the variance of residuals might be slightly larger for animals predicted to have a longer stay in the shelter. There are a few points that stand away from the bulk of the data, which could be outliers or extreme values. These might be worth investigating further as they could have a disproportionate impact on the model.
+
+-   Residuals vs. Leverage
+
+    ```{r}
+    #| echo: false
+    #| fig-cap: Residuals vs. Leverage
+    #| label: fig-BN4
+    #| fig-align: center
+    #| fig-width: 4
+    #| fig-height: 3
+
+    plot(glm_nb, which = 4)
+    ```
+
+    Observations with higher Cook's distance values are worth examining because they might be outliers or influential data points that could unduly affect the model's coefficients, predictions, and overall fit. Based on the plot @fig-BN4, most observations have a Cook's distance close to zero, indicating they have little influence on the regression model. However, there are a few observations, labeled with their observation numbers, that stand out with higher Cook's distance values yet not necessarily a problem for the fitting model.
+
+**Summary of Model Diagnostic**
+
+In conclusion, the model appears to perform well in terms of fitting the central tendency and dispersion of the data, as suggested by the lack of systematic patterns in residuals and the appropriate handling of overdispersion.
 
 ## B. Model Selection
 
-## C. Model Interpretation and Conclusion
+Considering $\text{ChipStatusScanNoChip}$ variable is not significant based on the summary model, we employed a backward elimination process guided by the Akaike Information Criterion (AIC) to identify the most parsimonious model that adequately explains the variation in the time animals spend at the shelter. This approach systematically removes the least significant predictors from the full model, optimizing the balance between model complexity and fit to the data.
+
+```{r}
+#Initial Model
+glm_nb <- glm.nb(time_at_shelter ~ animal_type + month + year + intake_type + chip_status, data = data)
+#Selected Model
+selected_nb <- stepAIC(glm_nb, direction = "backward")
+```
+
+The output of the stepAIC function with the direction set to "backward" suggests that the most parsimonious model according to the Akaike Information Criterion (AIC) is actually the initial model. The result of $\text{<none>}$ : 8350.4 as the lowest AIC indicates to remove no predictors from the current model.
+
+## C. Model Refinement
+
+# Conclusion
