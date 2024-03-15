@@ -222,6 +222,7 @@ vif(model)
 ```
 
 -   VIF values for type, chip, intake and outcome are all less than 5, suggesting that the linearity problems between them are minor and are unlikely to affect the model's results
+-   However month and year have a relatively high value compared to other variables, which also contribute to the reason we drop month and year.
 
 # Formal Data Analysis
 
