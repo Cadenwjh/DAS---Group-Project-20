@@ -1,5 +1,17 @@
 ---
-x
+title: "Group 20"
+format: 
+  html:
+    embed-resources: true
+    code-tools: true
+  pdf: default
+editor_options: 
+  chunk_output_type: console
+execute:
+  echo: false
+  eval: true
+  warning: false
+  message: false
 ---
 
 ```{r}
@@ -41,6 +53,7 @@ The main objective is to know **which factors influence the number of days an an
 library(ggplot2)
 library(dplyr)
 library(ggbeeswarm)
+library(car)
 ```
 
 ```{r}
@@ -53,7 +66,6 @@ data <- read.csv('dataset20.csv', stringsAsFactors = FALSE)
 sum(is.na(data))
 # Remove rows with missing values
 data <- na.omit(data)
-write.csv(data, 'data.csv')
 ```
 
 ```{r}
@@ -196,6 +208,93 @@ Animals without chips exhibit significant variability in their residence time in
 
 ## Summary Statistics
 
+```{r}
+# Summary statistics
+summary_stats <- summary(data)
+
+print(summary_stats)
+```
+
+-   Animal_type:
+
+There are four types of animals, with the highest number of dogs (1146), 304 cats, 3 birds, and 12 wild animals.
+
+-   Month:
+
+represents the month in the dataset, with a minimum value of 1 (January) and a maximum value of 12 (December). The median is 6.
+
+-   Year:
+
+The dataset contains data from 2016 and 2017.
+
+-   Intake_type:
+
+Describe the reasons why animals enter a shelter, mainly including being confiscated, being sent out for adoption by the owner, and wandering.
+
+-   Output_type:
+
+Describe the results of an animal leaving a shelter, including adoption, death, euthanasia, foster care, and return to its owner.
+
+-   Chip_status:
+
+Record whether animals have chips. There are 278 animals with chips, 1127 animals without chips, and 60 animals that cannot be scanned with chips.
+
+-   Time_shelter:
+
+The amount of time an animal stays in a shelter, from 0 days to a maximum of 87 days. The average stay time is about 6 days, with a median of 4 days.
+
+-   Date:
+
+The range of date data is from October 1, 2016 to September 1, 2017. The median date is April 1, 2017.
+
 ## Correlation Analysis
 
+```{r}
+# Select only numerical variables
+numeric_data <- data[, c("month", "year", "time_at_shelter")]
+
+# Using the cor() function to calculate the correlation coefficient matrix
+correlation_matrix <- cor(numeric_data, use = "complete.obs") # Processing missing values for the 'use' parameter
+
+print(correlation_matrix)
+```
+
+There is a strong negative correlation (-0.74) between month and year, which means that as the year increases, the month value decreases.
+
+The correlation between month and time_shelter is almost zero (-0.008), indicating that there is no significant linear relationship between the month and the time the animal spends in the shelter.
+
+The correlation between year and time_shelter is also very low (-0.039), indicating that there is no significant linear relationship between year and the time the animal stays in the shelter.
+
 ## Identifying Outliers
+```{r}
+# Calculate IQR
+Q1 <- quantile(data$time_at_shelter, 0.25)
+Q3 <- quantile(data$time_at_shelter, 0.75)
+IQR <- Q3 - Q1
+
+# Define the upper threshold for outliers
+upper_bound <- Q3 + 1.5 * IQR
+
+# Replace outliers with median
+data$time_at_shelter[data$time_at_shelter> upper_bound] <- median(data$time_at_shelter)
+
+# animal_type
+prop.table(table(data$animal_type))
+# think twice
+data <- data %>%
+  filter(!(animal_type=="BIRD" | animal_type=="WILDLIFE"))
+
+write.csv(data, 'data.csv')
+```
+
+## Multicollinearity
+```{r}
+# Fit a linear model with 'time_t_shell' as the response variable and all other columns as the predictive variables
+model <- lm(time_at_shelter ~ ., data = data)
+# Calculate and print VIF values
+vif_values <- vif(model)
+print(vif_values)
+```
+The GVIF values for month, year, and date are very high, especially for year and date, with adjusted GVIF values of approximately 241.73 and 163.95, respectively, far exceeding the conventional critical values, indicating a high degree of linear relationship between them and other variables in the model.
+
+The adjusted GVIF values for animal-type, intake_type, output_type, and chip_status are relatively low, indicating that their collinearity with other variables is relatively small.
