@@ -81,7 +81,7 @@ str(data)
 
 # Exploratory Data Analysis
 
-## numerical variables
+## Numerical Variables
 
 ```{r}
 #| label: fig-duration
@@ -113,7 +113,7 @@ We can see duration vary little across different months and years, so we may con
 
 \clearpage
 
-## categorical variables
+## Categorical Variables
 
 ```{r}
 #| label: tbl-type
@@ -239,11 +239,11 @@ In this section, several formal statistical models will be conducted using a Gen
 Since the response variable represents the count data, the Poisson regression model is a starting point because it is the simplest model for the type of the data. It was conducted by this result:
 
 ```{r, include=FALSE}
-# Please decide whether month and year should be removed!!!
 data <- subset(data, select = -month)
 data <- subset(data, select = -year)
 glm_poisson <- glm(duration~., family = "poisson", data = data)
 summary(glm_poisson)
+levels(outcome)
 ```
 
 Before presenting and interpreting the derived equation from our GLM analysis, it is important to note that validating the model is underlying assumptions is a critical step. Ensuring the assumptions hold true bolsters the reliability of our findings. Here's the equation based on the initial analysis, subject to further validation:
