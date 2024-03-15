@@ -491,6 +491,16 @@ Observations with higher Cook's distance values are worth examining because they
 
 In conclusion, the model appears to perform well in terms of fitting the central tendency and dispersion of the data, as suggested by the lack of systematic patterns in residuals and the appropriate handling of over-dispersion.
 
+## Model selection
+
+We employe a backward elimination process guided by the Akaike Information Criterion (AIC) to identify the most parsimonious model that adequately explains the variation in the time animals spend at the shelter. This approach systematically removes the least significant predictors from the full model, optimizing the balance between model complexity and fit to the data.
+
+```{r}
+glm_nb_optimal <- stepAIC(glm_nb, direction = "backward")
+```
+
+The output of the stepAIC function with the direction set to "backward" suggests that the most parsimonious model according to the Akaike Information Criterion (AIC) is actually the initial model. The result of $\text{<none>}$ : 6756.6 as the lowest AIC indicates to remove no predictors from the current model.
+
 # Conclusion
 
 This study analyzed the factors affecting the length of stay in the Dallas animal shelter. From exploratory data analysis, we found that most animals stay in shelters for a short time, and only a few stay for a long time.
