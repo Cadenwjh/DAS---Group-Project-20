@@ -294,6 +294,8 @@ The amount of time an animal stays in a shelter, from 0 days to a maximum of 87 
 
 The range of date data is from October 1, 2016 to September 1, 2017. The median date is April 1, 2017.
 
+## Correlation Analysis
+
 ```{r}
 # Select only numerical variables
 numeric_data <- data[, c("month", "year", "time_at_shelter")]
@@ -310,7 +312,7 @@ The correlation between month and time_shelter is almost zero (-0.008), indicati
 
 The correlation between year and time_shelter is also very low (-0.039), indicating that there is no significant linear relationship between year and the time the animal stays in the shelter.
 
-## Correlation Analysis
+## Identifying Qutiliers
 
 ```{r}
 # Calculate IQR
