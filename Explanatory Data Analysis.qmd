@@ -27,7 +27,7 @@ library(sjPlot)
 
 # Introduction
 
-The main objective is to know **which factors influence the number of days an animal spends in the shelter before their final outcome is decided**.
+The main objective is to know **which factors influence the number of days an animal spends in the shelter before their final outcome is decided**. Beginning with data ingestion and cleaning, it converts categorical variables into factors for statistical modeling. Several visualizations, such as box plots, histograms, and bar charts, delineate the distributions and relationships between variables, highlighting the influence of animal types, chip status, intake and outcome types on the time spent in the shelter. Summary statistics provide a quantitative overview, while a correlation matrix delves into the relationships between numerical variables. Outlier treatment and variable filtering refine the dataset, leading to a linear model to ascertain the predictive power of these factors on shelter time, vital for enhancing animal welfare and shelter operations.
 
 # Explanatory Data
 
