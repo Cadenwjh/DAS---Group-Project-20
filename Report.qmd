@@ -1,5 +1,5 @@
 ---
-title: "Influence on days in shelter"
+title: "Influence on days an animal spends in shelter"
 author: "Group 20"
 number-sections: true
 format: 
@@ -110,8 +110,6 @@ ggplot(data, aes(x=year,y=duration, group=year))+
 ```
 
 We can see duration vary little across different months and years, so we may consider ignore these two variables when modelling.
-
-\clearpage
 
 ## categorical variables
 
@@ -228,7 +226,7 @@ knitr::kable(vif(model))
 ```
 
 -   VIF values for type, chip, intake and outcome are all less than 5, suggesting that the linearity problems between them are minor and are unlikely to affect the model's results
--   However month and year have a relatively high value compared to other variables, which also contribute to the reason we drop month and year.
+-   However month and year have a relatively high value compared to other variables, which also contribute to the reason we drop them.
 
 # Formal Data Analysis
 
@@ -381,8 +379,6 @@ However, the presence of points with high residuals and high leverage in the rig
 
 When diagnostic plots provide different insights, it is crucial to consider the overall evidence and the specific research context. If over-dispersion is a consistent concern across multiple diagnostics (like the Residuals vs. Fitted Values Plot and the Scale-Location Plot), it often outweighs indications from other plots that the model might be adequate for most data points. Therefore, even if the Residuals vs. Leverage Plot suggests the model is mostly fitting well, the evidence of over-dispersion from the other plots is a strong indicator that the Poisson model might not be the best choice. Exploring alternative models like the Negative Binomial, which can accommodate over-dispersion, is likely a prudent step to improve model fit and ensure more reliable inference from the model.
 
-\clearpage
-
 ## Negative Binomial Model
 
 It will be conducted the Negative Binomial Model which is a good alternative model when the assumption of equidispersion (mean equals variance) in Poisson regression doesn't hold. The result was shown by:
@@ -499,7 +495,7 @@ In conclusion, the model appears to perform well in terms of fitting the central
 
 ## Model selection
 
-We employe a backward elimination process guided by the Akaike Information Criterion (AIC) to identify the most parsimonious model that adequately explains the variation in the time animals spend at the shelter. This approach systematically removes the least significant predictors from the full model, optimizing the balance between model complexity and fit to the data.
+We employ a backward elimination process guided by the Akaike Information Criterion (AIC) to identify the most parsimonious model that adequately explains the variation in the time animals spend at the shelter. This approach systematically removes the least significant predictors from the full model, optimizing the balance between model complexity and fit to the data.
 
 ```{r}
 glm_nb_optimal <- stepAIC(glm_nb, direction = "backward")
