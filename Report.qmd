@@ -207,18 +207,24 @@ for(cat in categories) {
 }
 ```
 
-```{r, include = FALSE}
-chisq.test(data$type, data$duration)
-chisq.test(data$intake, data$duration)
-chisq.test(data$outcome, data$duration)
-chisq.test(data$chip, data$duration)
+```{r}
+pvalues <- data.frame(
+  Variable = c("type", "intake", "outcome", "chip"),
+  P_Value = c(
+    chisq.test(data$type, data$duration)$p.value,
+    chisq.test(data$intake, data$duration)$p.value,
+    chisq.test(data$outcome, data$duration)$p.value,
+    chisq.test(data$chip, data$duration)$p.value
+  )
+)
+knitr::kable(pvalues)
 ```
 
 -   The chi-square test for all categorical variables have p-value less than 0.05. So they are all significant associated with the response variable duration.
 
-```{r, include = FALSE}
+```{r}
 model <- lm(duration~., data = data)
-vif(model)
+knitr::kable(vif(model))
 ```
 
 -   VIF values for type, chip, intake and outcome are all less than 5, suggesting that the linearity problems between them are minor and are unlikely to affect the model's results
