@@ -50,10 +50,11 @@ The main objective is to know **which factors influence the number of days an an
 -   Chip_Status -- Did the animal have a microchip with owner information?
 
 ```{r}
+library(car)
 library(ggplot2)
 library(dplyr)
 library(ggbeeswarm)
-library(car)
+library(knitr)
 ```
 
 ```{r}
@@ -62,8 +63,6 @@ library(car)
 data <- read.csv('dataset20.csv', stringsAsFactors = FALSE)
 
 # Data cleaning
-# Check for missing values
-sum(is.na(data))
 # Remove rows with missing values
 data <- na.omit(data)
 ```
@@ -79,7 +78,15 @@ data$outcome_type <- factor(data$outcome_type)
 data$chip_status <- factor(data$chip_status)
 ```
 
+## Relationship between Variables
+
 ```{r}
+#| echo: false
+#| fig.cap: "the distribution of animal time in shelters"
+#| label: fig-1
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
 # the distribution of animal time in shelters
 ggplot(data, aes(x=time_at_shelter)) + 
   geom_histogram(binwidth=1, fill='blue', color='black')
@@ -87,30 +94,45 @@ ggplot(data, aes(x=time_at_shelter)) +
 
 Most animals stay in the shelter for a short period of time, while a few animals stay in the shelter for a long time. Although the histogram itself does not display outliers, the long tail suggests that there are relatively few cases that have stayed in the shelter for a very long time, which may be outliers.
 
-## Relationship between Variables
-
-```{r}
-# the distribution of animal time in shelters
-ggplot(data, aes(x=time_at_shelter)) + 
-  geom_histogram(binwidth=1, fill='blue', color='black')
-```
 
 ## Data Visualization
 
 ```{r}
-# Data visualization
+#| echo: false
+#| fig.cap: "Box plot of animal types and shelter time"
+#| label: fig-2
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Box plot of animal types and shelter time
 ggplot(data, aes(x=animal_type, y=time_at_shelter, fill=animal_type)) + 
   geom_boxplot() +
   theme_minimal() +
   scale_fill_brewer(palette="Set1")
-
+```
+```{r}
+#| echo: false
+#| fig.cap: "Box plot of whether to implant chips and shelter time"
+#| label: fig-3
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Box plot of whether to implant chips and shelter time
 ggplot(data, aes(x=chip_status, y=time_at_shelter, fill=chip_status)) +
   geom_boxplot() +
   theme_minimal() +
   scale_fill_brewer(palette="Set1")
-
+```
+```{r}
+#| echo: false
+#| fig.cap: "Box plot of animal types and reasons for containment"
+#| label: fig-4
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Box plot of animal types and reasons for containment
 ggplot(data, aes(x=intake_type, y=time_at_shelter, fill=animal_type)) + 
   geom_boxplot() +
@@ -120,7 +142,15 @@ ggplot(data, aes(x=intake_type, y=time_at_shelter, fill=animal_type)) +
   labs(title="Time at Shelter by Intake Type and Animal Type",
        x="Intake Type",
        y="Time at Shelter (days)")
-
+```
+```{r}
+#| echo: false
+#| fig.cap: "Box plot of animal types and the outcome of leaving the shelter"
+#| label: fig-5
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Box plot of animal types and the outcome of leaving the shelter
 ggplot(data, aes(x=outcome_type, y=time_at_shelter, fill=animal_type)) + 
   geom_boxplot() +
@@ -130,7 +160,15 @@ ggplot(data, aes(x=outcome_type, y=time_at_shelter, fill=animal_type)) +
   labs(title="Time at Shelter by Outcome Type and Animal Type",
        x="Outcome Type",
        y="Time at Shelter (days)")
-
+```
+```{r}
+#| echo: false
+#| fig.cap: "Bar chart with chip status and containment reasons"
+#| label: fig-6
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Bar chart with chip status and containment reasons
 ggplot(data, aes(x=intake_type, fill=chip_status)) + 
   geom_bar(position="dodge") +
@@ -140,7 +178,15 @@ ggplot(data, aes(x=intake_type, fill=chip_status)) +
   labs(title="Intake Reasons by Chip Status",
        x="Intake Type",
        y="Count")
-
+```
+```{r}
+#| echo: false
+#| fig.cap: "Bar chart with chip status and outcome of leaving the shelter"
+#| label: fig-7
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Bar chart with chip status and outcome of leaving the shelter
 ggplot(data, aes(x=outcome_type, fill=chip_status)) + 
   geom_bar(position="dodge") +
@@ -179,6 +225,13 @@ Most chipless animals are ultimately adopted, possibly because many of them were
 Due to the fact that in a scatter plot, when there are too many data points, they may overlap, making it difficult to observe all the data points. We use a combination of bee plot and violin plot. The bee plot disperses points along a certain width of the classification axis, making each point clearly visible, while the violin plot shows the density of data distribution
 
 ```{r}
+#| echo: false
+#| fig.cap: "Violin chart combined with bee colony chart, showing the impact of animal types on the time spent in shelters"
+#| label: fig-8
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Violin chart combined with bee colony chart, showing the impact of animal types on the time spent in shelters
 ggplot(data, aes(x=animal_type, y=time_at_shelter, color=animal_type)) + 
   geom_violin(trim=FALSE) +
@@ -187,7 +240,15 @@ ggplot(data, aes(x=animal_type, y=time_at_shelter, color=animal_type)) +
   labs(title="Time at Shelter by Animal Type",
        x="Animal Type",
        y="Time at Shelter (days)")
-
+```
+```{r}
+#| echo: false
+#| fig.cap: "Violin chart combined with bee colony chart to demonstrate the impact of chip status on the time spent in the shelter"
+#| label: fig-9
+#| fig.align: 'center'
+#| fig.width: 4
+#| fig.height: 3
+#| # Data visualization
 # Violin chart combined with bee colony chart to demonstrate the impact of chip status on the time spent in the shelter
 ggplot(data, aes(x=chip_status, y=time_at_shelter, color=chip_status)) + 
   geom_violin(trim=FALSE) +
@@ -209,10 +270,10 @@ Animals without chips exhibit significant variability in their residence time in
 ## Summary Statistics
 
 ```{r}
-# Summary statistics
+# Summary Statistics
 summary_stats <- summary(data)
 
-print(summary_stats)
+kable(summary_stats, caption = "Summary Statistics")
 ```
 
 -   Animal_type:
@@ -256,7 +317,7 @@ numeric_data <- data[, c("month", "year", "time_at_shelter")]
 # Using the cor() function to calculate the correlation coefficient matrix
 correlation_matrix <- cor(numeric_data, use = "complete.obs") # Processing missing values for the 'use' parameter
 
-print(correlation_matrix)
+kable(correlation_matrix, caption = "correlation_matrix")
 ```
 
 There is a strong negative correlation (-0.74) between month and year, which means that as the year increases, the month value decreases.
@@ -293,7 +354,7 @@ write.csv(data, 'data.csv')
 model <- lm(time_at_shelter ~ ., data = data)
 # Calculate and print VIF values
 vif_values <- vif(model)
-print(vif_values)
+kable(vif_values, caption = "VIF values")
 ```
 The GVIF values for month, year, and date are very high, especially for year and date, with adjusted GVIF values of approximately 241.73 and 163.95, respectively, far exceeding the conventional critical values, indicating a high degree of linear relationship between them and other variables in the model.
 
