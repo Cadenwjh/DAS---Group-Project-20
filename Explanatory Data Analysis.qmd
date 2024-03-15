@@ -59,9 +59,6 @@ data <- na.omit(data)
 ```
 
 ```{r}
-# If 'month' and 'year' are used to create dates, it makes sense
-data$date <- as.Date(paste(data$year, data$month, "01", sep = "-"))
-
 # Convert 'animal_type', 'intake_type', 'output_type', 'chip_status' to factors
 data$animal_type <- factor(data$animal_type)
 data$intake_type <- factor(data$intake_type)
