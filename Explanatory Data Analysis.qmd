@@ -1,7 +1,5 @@
 ---
-title: "Group Project"
-author: "Group 20"
-number-sections: true
+title: "Group 20"
 format: 
   html:
     embed-resources: true
@@ -16,9 +14,20 @@ execute:
   message: false
 ---
 
+```{r}
+library(dplyr)
+library(ggplot2)
+library(faraway)
+library(gridExtra)
+library(MASS)
+library(plyr)
+library(dplyr)
+library(sjPlot)
+```
+
 # Introduction
 
-The main objective is to know **which factors influence the number of days an animal spends in the shelter before their final outcome is decided**. Beginning with data ingestion and cleaning, it converts categorical variables into factors for statistical modeling. Several visualizations, such as box plots, histograms, and bar charts, delineate the distributions and relationships between variables, highlighting the influence of animal types, chip status, intake and outcome types on the time spent in the shelter. Summary statistics provide a quantitative overview, while a correlation matrix delves into the relationships between numerical variables. Outlier treatment and variable filtering refine the dataset, leading to a linear model to ascertain the predictive power of these factors on shelter time, vital for enhancing animal welfare and shelter operations.
+The main objective is to know **which factors influence the number of days an animal spends in the shelter before their final outcome is decided**.
 
 # Explanatory Data
 
@@ -41,11 +50,10 @@ The main objective is to know **which factors influence the number of days an an
 -   Chip_Status -- Did the animal have a microchip with owner information?
 
 ```{r}
-library(car)
 library(ggplot2)
 library(dplyr)
 library(ggbeeswarm)
-library(knitr)
+library(car)
 ```
 
 ```{r}
@@ -54,6 +62,8 @@ library(knitr)
 data <- read.csv('dataset20.csv', stringsAsFactors = FALSE)
 
 # Data cleaning
+# Check for missing values
+sum(is.na(data))
 # Remove rows with missing values
 data <- na.omit(data)
 ```
@@ -66,15 +76,7 @@ data$outcome_type <- factor(data$outcome_type)
 data$chip_status <- factor(data$chip_status)
 ```
 
-## Relationship between Variables
-
 ```{r}
-#| echo: false
-#| fig.cap: "the distribution of animal time in shelters"
-#| label: fig-1
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
 # the distribution of animal time in shelters
 ggplot(data, aes(x=time_at_shelter)) + 
   geom_histogram(binwidth=1, fill='blue', color='black')
@@ -82,102 +84,68 @@ ggplot(data, aes(x=time_at_shelter)) +
 
 Most animals stay in the shelter for a short period of time, while a few animals stay in the shelter for a long time. Although the histogram itself does not display outliers, the long tail suggests that there are relatively few cases that have stayed in the shelter for a very long time, which may be outliers.
 
+## Relationship between Variables
+
+```{r}
+# the distribution of animal time in shelters
+ggplot(data, aes(x=time_at_shelter)) + 
+  geom_histogram(binwidth=1, fill='blue', color='black')
+```
+
 ## Data Visualization
 
 ```{r}
-#| echo: false
-#| fig.cap: "Box plot of animal types and shelter time"
-#| label: fig-2
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
+# Data visualization
 # Box plot of animal types and shelter time
 ggplot(data, aes(x=animal_type, y=time_at_shelter, fill=animal_type)) + 
   geom_boxplot() +
   theme_minimal() +
   scale_fill_brewer(palette="Set1")
-```
-```{r}
-#| echo: false
-#| fig.cap: "Box plot of whether to implant chips and shelter time"
-#| label: fig-3
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
+
 # Box plot of whether to implant chips and shelter time
 ggplot(data, aes(x=chip_status, y=time_at_shelter, fill=chip_status)) +
   geom_boxplot() +
   theme_minimal() +
   scale_fill_brewer(palette="Set1")
-```
-```{r}
-#| echo: false
-#| fig.cap: "Box plot of animal types and reasons for containment"
-#| label: fig-4
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
+
 # Box plot of animal types and reasons for containment
 ggplot(data, aes(x=intake_type, y=time_at_shelter, fill=animal_type)) + 
   geom_boxplot() +
   facet_wrap(~animal_type) + # Use face_wrap to divide faces by animal type
   theme_minimal() +
   scale_fill_brewer(palette="Set1") +
-  labs(x="Intake Type",
+  labs(title="Time at Shelter by Intake Type and Animal Type",
+       x="Intake Type",
        y="Time at Shelter (days)")
-```
-```{r}
-#| echo: false
-#| fig.cap: "Box plot of animal types and the outcome of leaving the shelter"
-#| label: fig-5
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
+
 # Box plot of animal types and the outcome of leaving the shelter
 ggplot(data, aes(x=outcome_type, y=time_at_shelter, fill=animal_type)) + 
   geom_boxplot() +
   facet_wrap(~animal_type) +
   theme_minimal() +
   scale_fill_brewer(palette="Set1") +
-  labs(x="Outcome Type",
+  labs(title="Time at Shelter by Outcome Type and Animal Type",
+       x="Outcome Type",
        y="Time at Shelter (days)")
-```
-```{r}
-#| echo: false
-#| fig.cap: "Bar chart with chip status and containment reasons"
-#| label: fig-6
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
+
 # Bar chart with chip status and containment reasons
 ggplot(data, aes(x=intake_type, fill=chip_status)) + 
   geom_bar(position="dodge") +
   facet_wrap(~chip_status) +
   theme_minimal() +
   scale_fill_brewer(palette="Set1") +
-  labs(x="Intake Type",
+  labs(title="Intake Reasons by Chip Status",
+       x="Intake Type",
        y="Count")
-```
-```{r}
-#| echo: false
-#| fig.cap: "Bar chart with chip status and outcome of leaving the shelter"
-#| label: fig-7
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
+
 # Bar chart with chip status and outcome of leaving the shelter
 ggplot(data, aes(x=outcome_type, fill=chip_status)) + 
   geom_bar(position="dodge") +
   facet_wrap(~chip_status) +
   theme_minimal() +
   scale_fill_brewer(palette="Set1") +
-  labs(x="Outcome Type",
+  labs(title="Outcome Types by Chip Status",
+       x="Outcome Type",
        y="Count")
 ```
 
@@ -208,13 +176,6 @@ Most chipless animals are ultimately adopted, possibly because many of them were
 Due to the fact that in a scatter plot, when there are too many data points, they may overlap, making it difficult to observe all the data points. We use a combination of bee plot and violin plot. The bee plot disperses points along a certain width of the classification axis, making each point clearly visible, while the violin plot shows the density of data distribution
 
 ```{r}
-#| echo: false
-#| fig.cap: "Violin chart combined with bee colony chart, showing the impact of animal types on the time spent in shelters"
-#| label: fig-8
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
 # Violin chart combined with bee colony chart, showing the impact of animal types on the time spent in shelters
 ggplot(data, aes(x=animal_type, y=time_at_shelter, color=animal_type)) + 
   geom_violin(trim=FALSE) +
@@ -223,15 +184,7 @@ ggplot(data, aes(x=animal_type, y=time_at_shelter, color=animal_type)) +
   labs(title="Time at Shelter by Animal Type",
        x="Animal Type",
        y="Time at Shelter (days)")
-```
-```{r}
-#| echo: false
-#| fig.cap: "Violin chart combined with bee colony chart to demonstrate the impact of chip status on the time spent in the shelter"
-#| label: fig-9
-#| fig.align: 'center'
-#| fig.width: 4
-#| fig.height: 3
-#| # Data visualization
+
 # Violin chart combined with bee colony chart to demonstrate the impact of chip status on the time spent in the shelter
 ggplot(data, aes(x=chip_status, y=time_at_shelter, color=chip_status)) + 
   geom_violin(trim=FALSE) +
@@ -253,10 +206,10 @@ Animals without chips exhibit significant variability in their residence time in
 ## Summary Statistics
 
 ```{r}
-# Summary Statistics
+# Summary statistics
 summary_stats <- summary(data)
 
-kable(summary_stats, caption = "Summary Statistics")
+print(summary_stats)
 ```
 
 -   Animal_type:
@@ -300,7 +253,7 @@ numeric_data <- data[, c("month", "year", "time_at_shelter")]
 # Using the cor() function to calculate the correlation coefficient matrix
 correlation_matrix <- cor(numeric_data, use = "complete.obs") # Processing missing values for the 'use' parameter
 
-kable(correlation_matrix, caption = "correlation_matrix")
+print(correlation_matrix)
 ```
 
 There is a strong negative correlation (-0.74) between month and year, which means that as the year increases, the month value decreases.
@@ -309,7 +262,7 @@ The correlation between month and time_shelter is almost zero (-0.008), indicati
 
 The correlation between year and time_shelter is also very low (-0.039), indicating that there is no significant linear relationship between year and the time the animal stays in the shelter.
 
-## Identifying Qutiliers
+## Identifying Outliers
 
 ```{r}
 # Calculate IQR
@@ -325,11 +278,56 @@ data$time_at_shelter[data$time_at_shelter> upper_bound] <- median(data$time_at_s
 
 # animal_type
 prop.table(table(data$animal_type))
-# think twice
 data <- data %>%
   filter(!(animal_type=="BIRD" | animal_type=="WILDLIFE"))
 
-write.csv(data, 'data.csv')
+# intake
+replace <- function(data, variable, category) {
+  Q1 <- quantile(data[[variable]][data$intake==category], 0.25)
+  Q3 <- quantile(data[[variable]][data$intake==category], 0.75)
+  IQR <- Q3 - Q1
+  upper <- Q3 + 1.5 * IQR
+  out <- which(data$intake==category & data[[variable]] > upper)
+  med <- median(data[[variable]][data$intake==category])
+  data[[variable]][out] <- med
+  return(data)
+}
+categories <- unique(data$intake)
+for(cat in categories) {
+  data <- replace(data, 'duration', cat)
+}
+
+# outcome
+replace2 <- function(data, variable, category) {
+  Q1 <- quantile(data[[variable]][data$outcome == category], 0.25)
+  Q3 <- quantile(data[[variable]][data$outcome == category], 0.75)
+  IQR <- Q3 - Q1
+  upper <- Q3 + 1.5 * IQR
+  out <- which(data$outcome == category & data[[variable]] > upper)
+  med <- median(data[[variable]][data$outcome == category])
+  data[[variable]][out] <- med
+  return(data)
+}
+categories <- unique(data$outcome)
+for(cat in categories) {
+  data <- replace2(data, 'duration', cat)
+}
+
+# chip
+replace3 <- function(data, variable, category) {
+  Q1 <- quantile(data[[variable]][data$chip == category], 0.25)
+  Q3 <- quantile(data[[variable]][data$chip == category], 0.75)
+  IQR <- Q3 - Q1
+  upper <- Q3 + 1.5 * IQR
+  out <- which(data$chip == category & data[[variable]] > upper)
+  med <- median(data[[variable]][data$chip == category])
+  data[[variable]][out] <- med
+  return(data)
+}
+categories <- unique(data$chip)
+for(cat in categories) {
+  data <- replace3(data, 'duration', cat)
+}
 ```
 
 ## Multicollinearity
@@ -338,11 +336,7 @@ write.csv(data, 'data.csv')
 # Fit a linear model with 'time_t_shell' as the response variable and all other columns as the predictive variables
 model <- lm(time_at_shelter ~ ., data = data)
 # Calculate and print VIF values
-vif_values <- vif(model)
-#VIF values
-kable(vif_values, caption = "VIF values")
+vif(model)
 ```
-The GVIF values for month, year, and date are very high, especially for year and date, with adjusted GVIF values of approximately 241.73 and 163.95, respectively, far exceeding the conventional critical values, indicating a high degree of linear relationship between them and other variables in the model.
 
-The adjusted GVIF values for animal-type, intake_type, output_type, and chip_status are relatively low, indicating that their collinearity with other variables is relatively small.
-
+The GVIF values for month, year are relatively high.
