@@ -109,9 +109,7 @@ ggplot(data, aes(x=year,y=duration, group=year))+
   geom_boxplot(aes(fill=year))
 ```
 
-We can see duration vary little across different months and years, so we may consider ignore these two variables when modelling.
-
-\clearpage
+We can see that duration varies little across different months and years, so we may consider ignoring these two variables when modelling.
 
 ## Categorical Variables
 
