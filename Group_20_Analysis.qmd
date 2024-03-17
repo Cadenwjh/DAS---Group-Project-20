@@ -124,7 +124,7 @@ ggplot(data, aes(x=year,y=duration, group=year))+
   geom_boxplot(aes(fill=year))
 ```
 
-Upon close examination of the distribution of shelter stay duration across different months and years, as depicted in Figures @fig-month and @fig-year, it becomes apparent that the duration exhibits minimal variability in relation to these temporal factors. The box-plots demonstrate that the median duration of stays, as well as the interquartile ranges, do not display significant shifts throughout the months or between the years under consideration. This lack of pronounced fluctuation suggests that the months and years do not markedly influence the length of time animals spend in the shelter. In light of this observation, we may prudently opt to exclude the variables pertaining to months and years from the predictive modelling process. This decision is based on a data-driven rationale, seeking to streamline the model by focusing on predictors that demonstrate a more substantial effect on the outcome variable, thereby enhancing the model's explanatory power and parsimony.
+Upon close examination of the distribution of shelter stay duration across different months and years, as depicted in @fig-month and @fig-year, it becomes apparent that the duration exhibits minimal variability in relation to these temporal factors. The box-plots demonstrate that the median duration of stays, as well as the interquartile ranges, do not display significant shifts throughout the months or between the years under consideration. This lack of pronounced fluctuation suggests that the months and years do not markedly influence the length of time animals spend in the shelter. In light of this observation, we may prudently opt to exclude the variables pertaining to months and years from the predictive modelling process. This decision is based on a data-driven rationale, seeking to streamline the model by focusing on predictors that demonstrate a more substantial effect on the outcome variable, thereby enhancing the model's explanatory power and parsimony.
 
 ## Categorical Variables
 
@@ -480,7 +480,7 @@ par(mfrow = c(1,1))
 plot(glm_nb, which = 1)
 ```
 
-Shown in the plot @fig-BN1, the residuals seem to increase slightly in variance with smaller fitted values, suggesting potential mild heteroscedasticity. However, since this is count data being modeled with a Negative Binomial regression, some of this is to be expected and the model accounts for it. There may be some potential outliers, but their influence would need further investigation, possibly with additional diagnostics like Cook's distance.
+Shown in the @fig-BN1, the residuals seem to increase slightly in variance with smaller fitted values, suggesting potential mild heteroscedasticity. However, since this is count data being modeled with a Negative Binomial regression, some of this is to be expected and the model accounts for it. There may be some potential outliers, but their influence would need further investigation, possibly with additional diagnostics like Cook's distance.
 
 -   Normal Q-Q Plot:
 
@@ -508,7 +508,7 @@ par(mfrow = c(1,1))
 plot(glm_nb, which = 3)
 ```
 
-The red line, captured on the plot @fig-BN3, shows some fluctuation but does not exhibit a clear or strong trend which indicates potential mild heteroscedasticity.
+The red line, captured on the @fig-BN3, shows some fluctuation but does not exhibit a clear or strong trend which indicates potential mild heteroscedasticity.
 
 -   Residuals vs. Leverage
 
@@ -522,7 +522,7 @@ par(mfrow = c(1,1))
 plot(glm_nb, which = 4)
 ```
 
-Observations with higher Cook's distance values are worth examining because they might be outliers or influential data points that could unduly affect the model's coefficients, predictions, and overall fit. Based on the plot @fig-BN4, most observations have a Cook's distance close to zero, indicating they have little influence on the regression model. However, there are a few observations, labeled with their observation numbers, that stand out with higher Cook's distance values yet not necessarily a problem for the fitting model.
+Observations with higher Cook's distance values are worth examining because they might be outliers or influential data points that could unduly affect the model's coefficients, predictions, and overall fit. Based on the @fig-BN4, most observations have a Cook's distance close to zero, indicating they have little influence on the regression model. However, there are a few observations, labeled with their observation numbers, that stand out with higher Cook's distance values yet not necessarily a problem for the fitting model.
 
 **Summary of Model Diagnostic**
 
@@ -543,10 +543,17 @@ Upon comparing the AIC of the refined Negative Binomial model against the Poisso
 
 # Conclusion
 
-This study analyzed the factors affecting the length of stay in the Dallas animal shelter. From exploratory data analysis, we found that most animals stay in shelters for a short time, and only a few stay for a long time.
+Our investigation into the Dallas Animal Shelter Dataset has identified critical factors affecting the duration of animals' shelter stays. Through rigorous application of Generalized Linear Models, we have navigated the complex landscape of animal shelter data, addressing both its strengths and limitations.
 
-In formal data analysis, we first tried the Poisson Regression Model, because the response variable represents the count data. However, diagnostic tests showed that there is over-dispersion in the data, suggesting that the Poisson Regression Model may not be the best option. Then we used the Negative Binomial Model, which adapts to the over-dispersion phenomenon.
+Key Findings:
 
-Diagnostic analyses of Negative Binomial Model reveal that the model performs well, despite mild heteroscedasticity and potential outliers.
+-   The Negative Binomial Model, selected for its fit and parsimony, outperformed the Poisson Regression Model by effectively handling over-dispersion in the data.
 
-In summary, our analysis shows that lots of important predictive variables influence the length of time an animal remain at the shelter before a final decision on their outcome is made, including the type of animal, the reason it was sent to the shelter, the final outcome, and if the animal has a microchip with owner information.
+-   Significant predictors such as animal type, intake reasons, outcomes, and microchip status have been quantified, offering insights into their roles in influencing shelter stay durations.
+
+-   Interventions targeting these factors could lead to improvements in shelter operations and animal welfare, particularly promoting microchipping and optimizing intake and adoption processes.
+
+Implications for Practice:
+Our findings suggest actionable strategies for shelters, including targeted campaigns for specific animal types and enhancing microchipping practices to facilitate faster reunification or adoption, ultimately aiming to shorten shelter stays and improve outcomes for animals.
+
+In light of these insights, shelters can better strategize resource allocation and management practices, potentially leading to more effective and compassionate outcomes for the animals in their care. While our model provides a strong foundation, we acknowledge that further research could incorporate additional nuanced data to enhance predictive capabilities and provide even deeper insights into shelter dynamics.
