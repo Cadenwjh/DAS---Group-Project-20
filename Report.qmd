@@ -1,5 +1,5 @@
 ---
-title: "Influence on days in shelter"
+title: "Factors Influencing the Number of Days Animals Spend in Shelter Before Final Outcome"
 author: "Group 20"
 number-sections: true
 format: 
@@ -56,7 +56,8 @@ colnames(data) <- c('type', 'month', 'year', 'intake', 'outcome', 'chip', 'durat
 
 ```{r}
 #| label: tbl-desc
-#| tbl-cap: 'Description of the Dataset'
+#| tbl-cap: The Description of the Dataset
+#| tbl-align: center
 desc_var <- c('The type of animal admitted to the shelter',
               'Month the animal was admitted',
               'Year the animal was admitted',
@@ -85,7 +86,8 @@ str(data)
 
 ```{r}
 #| label: fig-duration
-#| fig-cap: distribution of duration
+#| fig-cap: The Distribution of the Duration Variable
+#| fig-align: center
 ggplot(data, aes(x=duration)) + 
   geom_histogram(binwidth=1, fill='blue', color='black')
 ```
@@ -103,38 +105,50 @@ data$duration[out] <- med
 ```
 
 ```{r}
+#| label: fig-month
+#| fig-cap: The Distribution of Month vs Duration Variable 
+#| fig-align: center
 ggplot(data, aes(x=month,y=duration, group=month))+
   geom_boxplot(aes(fill=month))
+```
+
+```{r}
+#| label: fig-year
+#| fig-cap: The Distribution of Year vs Duration Variable 
+#| fig-align: center
 ggplot(data, aes(x=year,y=duration, group=year))+
   geom_boxplot(aes(fill=year))
 ```
 
-We can see duration vary little across different months and years, so we may consider ignore these two variables when modelling.
+Upon close examination of the distribution of shelter stay durations across different months and years, as depicted in Figures @fig-month and @fig-year, it becomes apparent that the duration exhibits minimal variability in relation to these temporal factors. The boxplots demonstrate that the median duration of stays, as well as the interquartile ranges, do not display significant shifts throughout the months or between the years under consideration. This lack of pronounced fluctuation suggests that the months and years do not markedly influence the length of time animals spend in the shelter. In light of this observation, we may prudently opt to exclude the variables pertaining to months and years from the predictive modeling process. This decision is based on a data-driven rationale, seeking to streamline the model by focusing on predictors that demonstrate a more substantial effect on the outcome variable, thereby enhancing the model's explanatory power and parsimony.
 
 \clearpage
 
 ## Categorical Variables
 
 ```{r}
-#| label: tbl-type
-#| tbl-cap: 'type of animals'
-knitr::kable(prop.table(table(data$type)))
+#| label: tbl-animaltype
+#| tbl-cap: The Distribution of Animal Types
+#| tbl-align: center
+animal_type_prop <- prop.table(table(data$type))
 data <- data %>%
   filter(!(type == "BIRD" | type == "WILDLIFE")) %>%
   droplevels()
+knitr::kable(animal_type_prop)
 ```
 
-Birds and wildlife only make up the 0.002 and 0.008 of the datasets, so they don't have a significant impact on the results. We then remove these observations.
+In the analysis of our shelter data, we have examined the distribution of animal types and noted that certain categories, specifically birds and wildlife, represent a very small fraction of our dataset---comprising just 0.2% and 0.8% respectively based on @tbl-animaltype. Given their minimal representation, these categories do not contribute substantially to the variance within our dataset and, consequently, are unlikely to significantly influence the outcomes of our statistical models. To enhance the robustness of our analysis and to focus on the most impactful factors, we have made the decision to exclude these observations from further analysis. This methodological choice is rooted in the principle of statistical significance which posits that only variables with enough data to demonstrate a discernible pattern should be included in the model to ensure accurate and reliable results.
 
 ```{r}
 #| label: fig-intake
-#| fig-cap: distribution of intake
+#| fig-cap: The Distribution of the Intake Variable
+#| fig-align: center
 ggplot(data, aes(y=duration, x=intake, group=intake))+
   geom_boxplot(aes(fill=intake))+
   theme(legend.position = "none")
 ```
 
-Remove corresponding outliers according to the reason the animal was admitted to the shelter.
+Then, upon examining @fig-intake, which illustrates the distribution of shelter stay durations across different intake reasons, we observe distinct patterns in the duration variance for each category. The presence of outliers, particularly evident in the categories of 'OWNER SURRENDER' and 'STRAY', warrants a closer analysis. Outliers can significantly influence statistical analyses, potentially skewing results and leading to misinterpretations. To ensure the integrity of our analysis and to focus on representative patterns, we will proceed to judiciously remove these outliers. This removal will be conducted in a manner that respects the underlying intake reason, thereby preserving the validity of our analysis while enhancing the model's predictive accuracy. The decision to exclude these data points is grounded in statistical best practices that seek to maintain the robustness of the model and the reliability of the conclusions drawn from it.
 
 ```{r}
 replace <- function(data, variable, category) {
@@ -155,13 +169,14 @@ for(cat in categories) {
 
 ```{r}
 #| label: fig-outcome
-#| fig-cap: distribution of outcome
+#| fig-cap: The Distribution of the Outcome Variable
+#| fig-align: center
 ggplot(data, aes(y=duration, x=outcome, group=outcome))+
   geom_boxplot(aes(fill=outcome))+
-  theme(legend.position = "none")
+  theme(legend.position = "none", axis.text.x = element_text(angle = 45, hjust = 1), plot.margin = margin(5.5, 20, 5.5, 5.5, "pt"))
 ```
 
-Remove corresponding outliers according final outcome.
+Similar to @fig-outcome which presents the distribution of shelter stay durations with respect to the outcomes of the animals' stays, offering valuable insights into the variations across different final outcomes. We notice outliers in the 'ADOPTION', 'EUTHANIZED', 'FOSTER', and 'RETURNED TO OWNER' categories. These are indicated by individual points that reside beyond the upper whisker of their respective boxplots, suggesting significantly longer stays than the typical cases within those categories. Such extreme values can disproportionately influence statistical models and skew the interpretations of the data. To maintain the rigor of our analysis and to avoid these biases, we will remove these outliers.
 
 ```{r}
 replace2 <- function(data, variable, category) {
@@ -182,13 +197,13 @@ for(cat in categories) {
 
 ```{r}
 #| label: fig-chip
-#| fig-cap: distribution of chip
+#| fig-cap: The Distribution of Chip Variable
 ggplot(data, aes(y=duration, x=chip, group=chip))+
   geom_boxplot(aes(fill=chip))+
   theme(legend.position = "none")
 ```
 
-Remove corresponding outliers according whether the animal have a microchip with owner information.
+Moving to the next variable in @fig-chip, we are presented with the lengths of stay based on the microchip status of animals within the shelter. It is clear that for the categories --- animals without a microchip (SCAN NO CHIP), and animals that could not be scanned (UNABLE TO SCAN) --- there are data points that reside notably above the upper whisker, which classifies them as outliers. These points represent atypically long shelter stays, and while they could reflect actual cases, they have the potential to disproportionately affect the statistical analysis and lead to skewed interpretations.
 
 ```{r}
 replace3 <- function(data, variable, category) {
@@ -207,7 +222,11 @@ for(cat in categories) {
 }
 ```
 
+## Identifying the Impact and Independence of Predictors on Shelter Stay Duration
+
 ```{r}
+#| label: tbl-chisquare
+#| tbl-cap: Chi-Square Test Results for Association with Duration of Shelter Stay
 pvalues <- data.frame(
   Variable = c("type", "intake", "outcome", "chip"),
   P_Value = c(
@@ -220,25 +239,24 @@ pvalues <- data.frame(
 knitr::kable(pvalues)
 ```
 
--   The chi-square test for all categorical variables have p-value less than 0.05. So they are all significant associated with the response variable duration.
+The Chi-Square test, a statistical method used to evaluate the association between categorical variables, reveals significant relationships between various factors and the duration of shelter stay. As indicated in @tbl-chisquare, the P-Value for each categorical variable---type, intake, outcome, and chip status---is below the conventional significance level of 0.05, demonstrating a statistically significant association with the duration variable. These results suggest that the type of animal, the reason for intake, the outcome of the shelter stay, and the presence of a microchip are all factors that correlate significantly with the length of time an animal spends in the shelter. This statistical evidence underpins the importance of these variables in understanding and predicting shelter stay durations, making them essential components for inclusion in any analytical model that seeks to capture the dynamics of animal shelter stays.
 
 ```{r}
+#| label: tbl-gvif
+#| tbl-cap: Multicollinearity Assessment of Predictor Variables
 model <- lm(duration~., data = data)
 knitr::kable(vif(model))
 ```
 
--   VIF values for type, chip, intake and outcome are all less than 5, suggesting that the linearity problems between them are minor and are unlikely to affect the model's results
--   However month and year have a relatively high value compared to other variables, which also contribute to the reason we drop month and year.
+The Generalized VIF (GVIF) are diagnostic measures that assess the extent of multicollinearity in regression analyses when predictor variables are correlated which can obscure individual variable effects and inflate standard errors. Meanwhile the $\text{GVIF}^{(1/(2 \times \text{Df}))}$ adjustment normalizes the GVIF value by the degrees of freedom associated with the categorical predictor, providing a more comparable metric across variables with different numbers of categories.
+
+In @tbl-gvif, the $\text{GVIF}^{(1/(2 \times \text{Df}))}$ values for 'month' and 'year' are close to 1.51 which indicates some degree of multicollinearity, though not at a level traditionally deemed excessive. Nevertheless, it is essential to consider the potential impact on the model. If the 'month' and 'year' variables do not contribute critical information beyond what other predictors offer, or if their inclusion complicates the model without substantial analytical benefit, it may be judicious to consider their transformation or exclusion.
+
+Meanwhile exhibited from @fig-month and @fig-year, the similarity in the distribution of 'duration' across all months and between the years 2016 and 2017 indicates that time-related trends may not be strong influencing factors for this dataset and also these variables may not be significant predictors of 'duration' in the shelter. Given the goal of model parsimony and clarity, omitting 'month' and 'year' could simplify the model without sacrificing explanatory power or predictive accuracy. This approach is consistent with the desire to focus on variables that provide clear, actionable insights into shelter stay duration and can be defended from both a statistical and practical standpoint. Thus, the combination of acceptable GVIF values and the boxplot observations lead to a reasonable conclusion to exclude 'month' and 'year' from further modeling efforts.
 
 # Formal Data Analysis
 
-In this section, several formal statistical models will be conducted using a Generalized Model Analysis to infer the relationships between variables.
-
-## Model Selection
-
-```{r}
-
-```
+Moving forward, the formal analysis will pivot to GLM to model shelter stay duration with these significant predictors. This will allow for a more nuanced understanding of how each variable contributes to the duration of stays, taking into account the potential confounding effect of multicollinearity. The GLM approach will also provide a methodological scaffold to isolate and quantify each predictor's impact. The overarching objective of this formal analysis is not just to enhance predictive accuracy but also to inform more strategic and targeted interventions that can reduce shelter stays.
 
 ## Model Fitting
 
@@ -286,7 +304,7 @@ Conversely, a large p-value suggests insufficient evidence to reject the null hy
 
 Derived from the model, all variables are significant predictors of the time an animal spends in the shelter.
 
-### Model Diagnostics and Assumptions Checking
+#### Model Diagnostics and Assumptions Checking
 
 The analysis utilized a Poisson regression model to investigate the impact of factors such as, including $\text{AnimalType}$, $\text{IntakeType}$, $\text{OutcomeType}$ and $\text{ChipStatus}$ on the duration of stay in a shelter. To ensure the robustness of our model, we conducted a thorough diagnostic evaluation using several methods. We checked the dispersion parameter to evaluate the presence of overdispersion, which would violate the Poisson assumption of equal mean and variance. We also examined the deviance to assess the model's goodness-of-fit, with a value near the degrees of freedom indicating a well-fitting model. Additionally, we conducted a residual analysis, including plotting residuals against fitted values and creating Q-Q plots of standardized residuals, to detect any systematic patterns that might indicate model misspecification. Together, these diagnostics help validate our model and confirm the reliability of our conclusions.
 
@@ -311,7 +329,10 @@ dispersiontest(glm_poisson)
 
 ```{r}
 #| label: fig-resid
-#| fig-cap: residual
+#| fig-cap: Analysis of Overdispersion in Poisson Regression Model
+#| fig-align: center
+#| fig-width: 4
+#| fig-height: 3
 ggplot(glm_poisson, aes(x = log(fitted(glm_poisson)), y = log((data$duration - fitted(glm_poisson))^2))) + geom_point(col = "#DD7A65") + geom_abline(slope = 1, intercept = 0, col = "#F58B05", size = 1) + ylab(expression((y-hat(mu))^2)) + xlab(expression(hat(mu)))
 ```
 
@@ -390,7 +411,7 @@ When diagnostic plots provide different insights, it is crucial to consider the 
 
 \clearpage
 
-## Negative Binomial Model
+### Negative Binomial Model
 
 It will be conducted the Negative Binomial Model which is a good alternative model when the assumption of equidispersion (mean equals variance) in Poisson regression doesn't hold. The result was shown by:
 
@@ -426,7 +447,7 @@ where,
 
 Derived from the model, all variables are significant predictors of the time an animal spends in the shelter.
 
-### Model Diagnostics and Assumptions Checking
+#### Model Diagnostics and Assumptions Checking
 
 To ensure the reliability and validity of our Negative Binomial regression model findings, it is imperative to rigorously examine the underlying assumptions through a series of diagnostic checks.
 
@@ -504,15 +525,18 @@ Observations with higher Cook's distance values are worth examining because they
 
 In conclusion, the model appears to perform well in terms of fitting the central tendency and dispersion of the data, as suggested by the lack of systematic patterns in residuals and the appropriate handling of over-dispersion.
 
-## Model Checking
+## Model Selection
 
-We employe a backward elimination process guided by the Akaike Information Criterion (AIC) to identify the most parsimonious model that adequately explains the variation in the time animals spend at the shelter. This approach systematically removes the least significant predictors from the full model, optimizing the balance between model complexity and fit to the data.
+We employe a backward elimination process guided by the Akaike Information Criterion (AIC) to identify the most parsimonious model that adequately explains the variation in the time animals spend at the shelter. This approach systematically removes the least significant predictors from the model, optimizing the balance between model complexity and fit to the data.
 
 ```{r}
 glm_nb_optimal <- stepAIC(glm_nb, direction = "backward")
+glm_poisson_optimal <- stepAIC(glm_poisson, direction = "backward")
 ```
 
-The output of the stepAIC function with the direction set to "backward" suggests that the most parsimonious model according to the Akaike Information Criterion (AIC) is actually the initial model. The result of $\text{<none>}$ : 6756.6 as the lowest AIC indicates to remove no predictors from the current model.
+The output of our backward stepwise selection process, as implemented via the stepAIC function, has been instrumental in guiding us toward the most parsimonious model to explain the duration of stays in animal shelters. This rigorous procedure evaluated both Poisson and Negative Binomial distributions, with the resulting AIC values serving as our yardstick for model comparison. Notably, the stepAIC procedure indicated that the initial model, which garnered an AIC of 6756.64, is the most efficient configuration, as further removal of predictors did not yield a lower AIC value. This finding aligns with the principle of parsimony, which underscores the importance of model simplicity without sacrificing explanatory power.
+
+Upon comparing the AIC of the refined Negative Binomial model against the Poisson model, the former, with a substantially lower AIC, clearly emerged as the superior fit. The Negative Binomial model's AIC of 6756.64 stands in stark contrast to the Poisson model's AIC of 12216.73, reinforcing the suitability of the Negative Binomial distribution for our count data, which exhibits signs of overdispersion. This compelling evidence has led us to select the Negative Binomial model for in-depth analysis, ensuring that our investigative framework is not only robust and statistically sound but also retains clarity and interpretability for drawing meaningful conclusions.
 
 # Conclusion
 
