@@ -234,7 +234,15 @@ knitr::kable(vif(model))
 
 In this section, several formal statistical models will be conducted using a Generalized Model Analysis to infer the relationships between variables.
 
-## Poisson Model
+## Model Selection
+
+```{r}
+
+```
+
+## Model Fitting
+
+### Poisson Model
 
 Since the response variable represents the count data, the Poisson regression model is a starting point because it is the simplest model for the type of the data. It was conducted by this result:
 
@@ -243,7 +251,6 @@ data <- subset(data, select = -month)
 data <- subset(data, select = -year)
 glm_poisson <- glm(duration~., family = "poisson", data = data)
 summary(glm_poisson)
-levels(outcome)
 ```
 
 Before presenting and interpreting the derived equation from our GLM analysis, it is important to note that validating the model is underlying assumptions is a critical step. Ensuring the assumptions hold true bolsters the reliability of our findings. Here's the equation based on the initial analysis, subject to further validation:
@@ -497,7 +504,7 @@ Observations with higher Cook's distance values are worth examining because they
 
 In conclusion, the model appears to perform well in terms of fitting the central tendency and dispersion of the data, as suggested by the lack of systematic patterns in residuals and the appropriate handling of over-dispersion.
 
-## Model selection
+## Model Checking
 
 We employe a backward elimination process guided by the Akaike Information Criterion (AIC) to identify the most parsimonious model that adequately explains the variation in the time animals spend at the shelter. This approach systematically removes the least significant predictors from the full model, optimizing the balance between model complexity and fit to the data.
 
